@@ -4,7 +4,7 @@
 
 #include "data.h"
 
-Data::Data(std::string file_path, int num_of_clusters, int max_iterations, 
+Data::Data(const std::string& file_path, int num_of_clusters, int max_iterations, 
            int num_of_runs, double convergence_threshold)
            : file_path_(file_path), num_of_clusters_(num_of_clusters), 
            max_iterations_(max_iterations), 
@@ -12,18 +12,6 @@ Data::Data(std::string file_path, int num_of_clusters, int max_iterations,
            convergence_threshold_(convergence_threshold) {
   readPoints();
   selectCentroids();
-}
-
-Data::~Data() {
-  for (int i = 0; i < num_of_points_; i++) {
-    delete[] points_[i];
-  }
-  delete[] points_;
-
-  for (int i = 0; i < num_of_clusters_; i++) {
-    delete[] centroids_[i];
-  }
-  delete[] centroids_;
 }
 
 int Data::getNumOfPoints() {
@@ -50,32 +38,27 @@ double Data::getConvergenceThreshold() {
   return convergence_threshold_;
 }
 
-double** Data::getPoints() {
+std::vector<std::vector<double>> Data::getPoints() {
   return points_;
 }
 
-double** Data::getCentroids() {
+std::vector<std::vector<double>> Data::getCentroids() {
   return centroids_;
 }
 
 //select random centroids based on how many clusters there are
 //read points must be ran before this is called
 void Data::selectCentroids() {
-  if (!num_of_points_ || !num_of_dimensions_ || points_ == nullptr) {
+  if (!num_of_points_ || !num_of_dimensions_) {
     std::cout << "readPoints() must be ran before selectCentroids() is called.";
-    exit(1);
+    std::exit(1);
   }
 
   std::srand(std::time(0));
 
-  centroids_ = new double*[num_of_clusters_];
-
   for (int i = 0; i < num_of_clusters_; i++) {
     int random_index = std::rand() % num_of_points_;
-    centroids_[i] = new double[num_of_dimensions_];
-    for (int j = 0; j < num_of_dimensions_; j++) {
-      centroids_[i][j] = points_[random_index][j];
-    }
+    centroids_.push_back(points_[random_index]);
   }
 }
 
@@ -90,12 +73,12 @@ void Data::readPoints() {
   file >> num_of_points_;
   file >> num_of_dimensions_;
 
-  points_ = new double*[num_of_points_];
+  points_.resize(num_of_points_, std::vector<double>(num_of_dimensions_));
+
 	for (int i = 0; i < num_of_points_; i++) {
-		points_[i] = new double[num_of_dimensions_];
 		for (int j = 0; j < num_of_dimensions_; j++) {
-			file >> points_[i][j];
-		}
+      file >> points_[i][j];
+    }
 	}
 }
 
