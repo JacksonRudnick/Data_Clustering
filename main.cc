@@ -28,6 +28,7 @@ int main(int argc, char* argv[]) {
   Data* data = readEnvVariables(argc, argv);
 
   data->printCentroids();
+  data->exportCentroids();
 
   return 0;
 }

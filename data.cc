@@ -94,10 +94,22 @@ void Data::printData() {
 
 void Data::printCentroids() {
   for (int i = 0; i < num_of_clusters_; i++) {
-    std::cout << "Centroid " << i + 1 << ": ";
     for (int j = 0; j < num_of_dimensions_; j++) {
       std::cout << centroids_[i][j] << " ";
     }
     std::cout << "\n";
+  }
+}
+
+void Data::exportCentroids() {
+  //take original file and replace it with base file name + .output
+  std::ofstream output_stream(file_path_.substr(file_path_.find_last_of("/")+1,
+    file_path_.find_last_of(".")-file_path_.find_last_of("/")-1)+".outputs");
+
+  for (int i = 0; i < num_of_clusters_; i++) {
+    for (int j = 0; j < num_of_dimensions_; j++) {
+      output_stream << centroids_[i][j] << " ";
+    }
+    output_stream << "\n";
   }
 }

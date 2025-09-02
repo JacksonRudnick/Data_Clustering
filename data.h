@@ -41,6 +41,7 @@ class Data {
     std::vector<std::vector<double>> getCentroids();
     void printData();
     void printCentroids();
+    void exportCentroids();
 };
 
 #endif // DATA_H
