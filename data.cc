@@ -4,6 +4,7 @@
 
 #include "data.h"
 
+//Define class variables and conduct main class code
 Data::Data(const std::string& file_path, int num_of_clusters, int max_iterations, 
            int num_of_runs, double convergence_threshold)
            : file_path_(file_path), num_of_clusters_(num_of_clusters), 
