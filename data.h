@@ -1,9 +1,14 @@
+//Author: Jackson Rudnick
+//Coding Style Standards
+//https://google.github.io/styleguide/cppguide.html
+
 #ifndef DATA_H
 #define DATA_H
 
+#include <iostream>
+#include <ctime>
 #include <string>
 #include <fstream>
-#include <iostream>
 
 class Data {
 	private:

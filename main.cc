@@ -1,35 +1,35 @@
+//Author: Jackson Rudnick
+//Coding Style Standards
+//https://google.github.io/styleguide/cppguide.html
+
 #include <iostream>
 #include <string>
 #include <fstream>
 #include <ctime>
 
 #include "data.h"
-#include "reader.h"
 
-temp_Data read_env_variables(int argc, char* argv[]) {
+Data* readEnvVariables(int argc, char* argv[]) {
 	if (argc != 6) {
 		std::cout << "Usage: " << argv[0] << " <data_file> <num_of_clusters> <max_iterations> <convergence_threshold> <num_of_runs>\n";
 		exit(1);
 	}
 
-	temp_Data d;
-	d.file_path = (std::string)argv[1];
-	d.num_of_clusters = std::stoi(argv[2]);
-	d.max_iterations = std::stoi(argv[3]);
-	d.convergence_threshold = std::stod(argv[4]);
-	d.num_of_runs = std::stoi(argv[5]);
-	return d;
+	std::string file_path = (std::string)argv[1];
+	int num_of_clusters = std::stoi(argv[2]);
+	int max_iterations = std::stoi(argv[3]);
+	double convergence_threshold = std::stod(argv[4]);
+	int num_of_runs = std::stoi(argv[5]);
+
+	return new Data(file_path, num_of_clusters, max_iterations, num_of_runs, convergence_threshold);
 }
 
 int main(int argc, char* argv[]) {
-	Data d = new Data();
+	Data* d = nullptr;
 
-	temp_Data td = read_env_variables(argc, argv);
-	
-	reader* r = new reader(td.file_path, );
+	d = readEnvVariables(argc, argv);
 
-	select_centroids();
-
+	d->printCentroids();
 
 	return 0;
 }
