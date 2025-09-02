@@ -104,7 +104,7 @@ void Data::printCentroids() {
 void Data::exportCentroids() {
   //take original file and replace it with base file name + .output
   std::ofstream output_stream(file_path_.substr(file_path_.find_last_of("/")+1,
-    file_path_.find_last_of(".")-file_path_.find_last_of("/")-1)+".outputs");
+    file_path_.find_last_of(".")-file_path_.find_last_of("/")-1)+".output");
 
   for (int i = 0; i < num_of_clusters_; i++) {
     for (int j = 0; j < num_of_dimensions_; j++) {
