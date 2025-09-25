@@ -7,67 +7,89 @@
 //Define class variables and conduct main class code
 Data::Data(const std::string& file_path, int num_of_clusters, int max_iterations, 
            int num_of_runs, double convergence_threshold)
-           : file_path_(file_path), num_of_clusters_(num_of_clusters), 
+           : kfile_path_(file_path), num_of_clusters_(num_of_clusters), 
            max_iterations_(max_iterations), 
            num_of_runs_(num_of_runs),
            convergence_threshold_(convergence_threshold) {
-  readPoints();
-  selectCentroids();
+  ReadPoints();
+  SelectCentroids();
 }
 
-int Data::getNumOfPoints() {
+int Data::GetNumOfPoints() {
   return num_of_points_;
 }
 
-int Data::getNumOfDimensions() {
+int Data::GetNumOfDimensions() {
   return num_of_dimensions_;
 }
 
-int Data::getNumOfClusters() {
+int Data::GetNumOfClusters() {
   return num_of_clusters_;
 }
 
-int Data::getMaxIterations() {
+int Data::GetMaxIterations() {
   return max_iterations_;
 }
 
-int Data::getNumOfRuns() {
+int Data::GetNumOfRuns() {
   return num_of_runs_;
 }
 
-double Data::getConvergenceThreshold() {
+double Data::GetConvergenceThreshold() {
   return convergence_threshold_;
 }
 
-std::vector<std::vector<double>> Data::getPoints() {
+std::vector<std::vector<double>> Data::GetPoints() {
   return points_;
 }
 
-std::vector<std::vector<double>> Data::getCentroids() {
+std::vector<std::vector<double>> Data::GetCentroids() {
   return centroids_;
+}
+
+void Data::SetCentroids(std::vector<std::vector<double>> new_centroids) {
+  centroids_.clear();
+  for (int i = 0; i < num_of_clusters_; i++) {
+    centroids_.push_back(new_centroids[i]);
+  }
 }
 
 //select random centroids based on how many clusters there are
 //read points must be ran before this is called
-void Data::selectCentroids() {
+void Data::SelectCentroids() {
   if (!num_of_points_ || !num_of_dimensions_) {
     std::cout << "readPoints() must be ran before selectCentroids() is called.";
     std::exit(1);
   }
 
-  std::srand(std::time(0));
+  if (!centroids_.empty()) {
+    centroids_.clear();
+  }
+
+  std::uniform_int_distribution<> distrib(0, num_of_points_-1); 
+
+  std::vector<int> used_indices;
 
   for (int i = 0; i < num_of_clusters_; i++) {
-    int random_index = std::rand() % num_of_points_;
+    int random_index = distrib(gen_);
+
+    for (int j = 0; j < used_indices.size(); j++) {
+      if (used_indices[j] == random_index) {
+        random_index = distrib(gen_);
+        j--;
+      }
+    }
+
+    used_indices.push_back(random_index);
     centroids_.push_back(points_[random_index]);
   }
 }
 
-void Data::readPoints() {
-  std::ifstream file(file_path_);
+void Data::ReadPoints() {
+  std::ifstream file(kfile_path_);
 
   if (!file.is_open()) {
-    std::cout << "File failed to open. PATH :: " << file_path_ << std::endl;
+    std::cout << "File failed to open. PATH :: " << kfile_path_ << std::endl;
   }
 
   //first two entries in file are points and dimensions
@@ -83,7 +105,7 @@ void Data::readPoints() {
 	}
 }
 
-void Data::printData() {
+void Data::PrintData() {
   for (int i = 0; i < num_of_points_; i++) {
     for (int j = 0; j < num_of_dimensions_; j++) {
       std::cout << points_[i][j] << " ";
@@ -92,7 +114,7 @@ void Data::printData() {
   }
 }
 
-void Data::printCentroids() {
+void Data::PrintCentroids() {
   for (int i = 0; i < num_of_clusters_; i++) {
     for (int j = 0; j < num_of_dimensions_; j++) {
       std::cout << centroids_[i][j] << " ";
@@ -101,10 +123,11 @@ void Data::printCentroids() {
   }
 }
 
-void Data::exportCentroids() {
+void Data::ExportCentroids() {
   //take original file and replace it with base file name + .output
-  std::ofstream output_stream(file_path_.substr(file_path_.find_last_of("/")+1,
-    file_path_.find_last_of(".")-file_path_.find_last_of("/")-1)+".output");
+  std::ofstream output_stream("outputs/"+kfile_path_.substr(kfile_path_.
+    find_last_of("/")+1,kfile_path_.find_last_of(".")-kfile_path_.
+    find_last_of("/")-1)+".output");
 
   for (int i = 0; i < num_of_clusters_; i++) {
     for (int j = 0; j < num_of_dimensions_; j++) {
