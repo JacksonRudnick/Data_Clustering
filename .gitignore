@@ -1,5 +1,8 @@
 *.out
 *.output
 *.zip
+*.pdf
+
 callgrind.*
+
 /outputs

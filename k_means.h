@@ -37,7 +37,8 @@ class K_Means {
   bool CalculateSSE(int iter);
   void UpdateCentroids();
   void InitializeClusters();
-  void CheckEmptyClusters();
+  void CheckForSingletonClusters();
+  void UpdateWorstDistance(int cluster_index);
   double GetDistance(std::vector<double> *p1, std::vector<double> *p2);
 
  public:

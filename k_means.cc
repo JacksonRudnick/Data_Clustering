@@ -29,6 +29,8 @@ void K_Means::AssignPointsToClusters() {
   // clear points from previous iteration
   for (int i = 0; i < clusters_.size(); i++) {
     clusters_[i].points_.clear();
+    clusters_[i].worst_distance_ = 0.0;
+    clusters_[i].pos_of_worst_point_ = -1;
   }
 
   // assign points to clusters O(n*k*d)
@@ -74,6 +76,12 @@ bool K_Means::CalculateSSE(int iter) {
 
 void K_Means::UpdateCentroids() {
   for (int i = 0; i < clusters_.size(); i++) {
+    if (clusters_[i].points_.empty()) {
+      // Skip empty clusters - centroid will be handled by
+      // CheckForSingletonClusters
+      continue;
+    }
+
     std::vector<double> new_centroid;
     new_centroid.resize(clusters_[i].centroid_.size());
 
@@ -91,9 +99,9 @@ void K_Means::UpdateCentroids() {
   }
 }
 
-void K_Means::CheckEmptyClusters() {
+void K_Means::CheckForSingletonClusters() {
   for (int i = 0; i < num_of_clusters_; i++) {
-    if (clusters_[i].points_.empty()) {
+    if (clusters_[i].points_.size() <= 1) {
       // store to reduce multiple memory accesses
       double worst_distance = 0;
       int pos_of_worst_point = -1;
@@ -114,10 +122,29 @@ void K_Means::CheckEmptyClusters() {
             clusters_[cluster_with_worst_point].points_[pos_of_worst_point]);
         clusters_[i].centroid_ = clusters_[i].points_[0];
 
+        // Safely remove from source cluster
         clusters_[cluster_with_worst_point].points_.erase(
             clusters_[cluster_with_worst_point].points_.begin() +
             pos_of_worst_point);
+
+        // Update worst distance tracking for the source cluster
+        UpdateWorstDistance(cluster_with_worst_point);
       }
+    }
+  }
+}
+
+void K_Means::UpdateWorstDistance(int cluster_index) {
+  clusters_[cluster_index].worst_distance_ = 0.0;
+  clusters_[cluster_index].pos_of_worst_point_ = -1;
+
+  // check all of the points in the cluster to find the new worst distance
+  for (int i = 0; i < clusters_[cluster_index].points_.size(); i++) {
+    double distance = GetDistance(&clusters_[cluster_index].points_[i],
+                                  &clusters_[cluster_index].centroid_);
+    if (distance > clusters_[cluster_index].worst_distance_) {
+      clusters_[cluster_index].worst_distance_ = distance;
+      clusters_[cluster_index].pos_of_worst_point_ = i;
     }
   }
 }
@@ -141,15 +168,12 @@ double K_Means::GetDistance(std::vector<double> *p1, std::vector<double> *p2) {
 }
 
 K_Means::K_Means(Data *data) : data_(data) {
-  clusters_.resize(data->GetNumOfClusters());
-  for (int i = 0; i < data->GetNumOfClusters(); i++) {
-    clusters_[i].centroid_ = data->GetCentroids()[i];
-  }
-
   // Making copies of these variables saves time
   num_of_points_ = data->GetNumOfPoints();
   num_of_clusters_ = data->GetNumOfClusters();
   points_ = data->GetPoints();
+
+  clusters_.resize(num_of_clusters_);
 }
 
 void K_Means::InitializeClusters() {
@@ -157,6 +181,8 @@ void K_Means::InitializeClusters() {
   clusters_.resize(num_of_clusters_);
   for (int i = 0; i < num_of_clusters_; i++) {
     clusters_[i].centroid_ = data_->GetCentroids()[i];
+    clusters_[i].worst_distance_ = 0.0;
+    clusters_[i].pos_of_worst_point_ = -1;
   }
 }
 
@@ -203,6 +229,20 @@ void K_Means::Run() {
       iter_start = std::chrono::high_resolution_clock::now();
 #endif
 
+      CheckForSingletonClusters();
+
+#if CHECK_PERFORMANCE
+      iter_stop = std::chrono::high_resolution_clock::now();
+      iter_duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+          iter_stop - iter_start);
+      std::cout << "Check for singleton clusters took: "
+                << iter_duration.count() << " milliseconds" << std::endl;
+#endif
+
+#if CHECK_PERFORMANCE
+      iter_start = std::chrono::high_resolution_clock::now();
+#endif
+
       UpdateCentroids();
 
 #if CHECK_PERFORMANCE
@@ -210,20 +250,6 @@ void K_Means::Run() {
       iter_duration = std::chrono::duration_cast<std::chrono::milliseconds>(
           iter_stop - iter_start);
       std::cout << "Updating centroids took: " << iter_duration.count()
-                << " milliseconds" << std::endl;
-#endif
-
-#if CHECK_PERFORMANCE
-      iter_start = std::chrono::high_resolution_clock::now();
-#endif
-
-      CheckEmptyClusters();
-
-#if CHECK_PERFORMANCE
-      iter_stop = std::chrono::high_resolution_clock::now();
-      iter_duration = std::chrono::duration_cast<std::chrono::milliseconds>(
-          iter_stop - iter_start);
-      std::cout << "Check empty clusters took: " << iter_duration.count()
                 << " milliseconds" << std::endl;
 #endif
     }
