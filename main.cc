@@ -13,7 +13,7 @@
 #include "./data.h"
 #include "./k_means.h"
 
-Data *ReadEnvVariables(int argc, char *argv[]) {
+Data *ReadArgs(int argc, char *argv[]) {
   if (argc != 6) {
     std::cout << "Usage: " << argv[0]
               << " <data_file> <num_of_clusters> <max_iterations> "
@@ -32,7 +32,7 @@ Data *ReadEnvVariables(int argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
-  Data *data = ReadEnvVariables(argc, argv);
+  Data *data = ReadArgs(argc, argv);
 
 #if OUT_TO_FILE
   std::ofstream output_stream(

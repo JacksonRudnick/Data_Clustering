@@ -3,16 +3,17 @@
 // https://google.github.io/styleguide/cppguide.html
 // Copyright 2025 Jackson Rudnick
 
-#ifndef K_MEANS_H
-#define K_MEANS_H
+#ifndef K_MEANS_H_
+#define K_MEANS_H_
 
 #include <chrono>
 #include <iostream>
+#include <limits>
 #include <thread>
 #include <vector>
 
-#include "config.h"
-#include "data.h"
+#include "./config.h"
+#include "./data.h"
 
 struct Cluster {
   std::vector<std::vector<double>> points_;
@@ -22,7 +23,7 @@ struct Cluster {
 };
 
 class K_Means {
-private:
+ private:
   int num_of_points_;
   int num_of_clusters_;
   std::vector<std::vector<double>> points_;
@@ -39,10 +40,10 @@ private:
   void CheckEmptyClusters();
   double GetDistance(std::vector<double> *p1, std::vector<double> *p2);
 
-public:
-  K_Means(Data *data);
+ public:
+  explicit K_Means(Data *data);
 
   void Run();
 };
 
-#endif //  K_MEANS_H
+#endif  // K_MEANS_H_

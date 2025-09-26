@@ -3,20 +3,21 @@
 // https://google.github.io/styleguide/cppguide.html
 // Copyright 2025 Jackson Rudnick
 
+#include "./data.h"
+
 #include <iostream>
 #include <string>
 #include <vector>
 
-#include "./data.h"
-
 // Define class variables and conduct main class code
 Data::Data(const std::string &file_path, int num_of_clusters,
            int max_iterations, int num_of_runs, double convergence_threshold)
-    : kfile_path_(file_path), num_of_clusters_(num_of_clusters),
-      max_iterations_(max_iterations), num_of_runs_(num_of_runs),
+    : kfile_path_(file_path),
+      num_of_clusters_(num_of_clusters),
+      max_iterations_(max_iterations),
+      num_of_runs_(num_of_runs),
       convergence_threshold_(convergence_threshold) {
   ReadPoints();
-  SelectCentroids();
 }
 
 int Data::GetNumOfPoints() { return num_of_points_; }
@@ -115,9 +116,9 @@ void Data::ExportCentroids() {
   // take original file and replace it with base file name + .output
   std::ofstream output_stream(
       "outputs/" +
-      kfile_path_.substr(kfile_path_.find_last_of("/") + 1,
-                         kfile_path_.find_last_of(".") -
-                             kfile_path_.find_last_of("/") - 1) +
+      kfile_path_.substr(
+          kfile_path_.find_last_of("/") + 1,
+          kfile_path_.find_last_of(".") - kfile_path_.find_last_of("/") - 1) +
       ".output");
 
   for (int i = 0; i < num_of_clusters_; i++) {

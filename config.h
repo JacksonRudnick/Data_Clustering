@@ -3,10 +3,10 @@
 // https://google.github.io/styleguide/cppguide.html
 // Copyright 2025 Jackson Rudnick
 
-#define CONFIG_H
-#ifdef CONFIG_H
+#ifndef CONFIG_H_
+#define CONFIG_H_
 
 #define OUT_TO_FILE 1
 #define CHECK_PERFORMANCE 0
 
-#endif
+#endif  // CONFIG_H_

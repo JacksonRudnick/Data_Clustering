@@ -19,11 +19,11 @@ Move clusters based on mean of assigned points
 Repeat
 */
 
+#include "./k_means.h"
+
 #include <iostream>
 #include <limits>
 #include <vector>
-
-#include "./k_means.h"
 
 void K_Means::AssignPointsToClusters() {
   // clear points from previous iteration
@@ -66,8 +66,7 @@ bool K_Means::CalculateSSE(int iter) {
   }
 
   std::cout << "Iteration " << iter + 1 << ": SSE = " << sse << std::endl;
-  if (data_->GetConvergenceThreshold() >= (sse_ - sse))
-    return true;
+  if (data_->GetConvergenceThreshold() >= (sse_ - sse)) return true;
   sse_ = sse;
 
   return false;
@@ -101,7 +100,7 @@ void K_Means::CheckEmptyClusters() {
       int cluster_with_worst_point = -1;
 
       for (int j = 0; j < num_of_clusters_; j++) {
-        if (!clusters_[j].points_.empty() &&
+        if (clusters_[j].points_.size() > 1 &&
             clusters_[j].worst_distance_ > worst_distance) {
           worst_distance = clusters_[j].worst_distance_;
           pos_of_worst_point = clusters_[j].pos_of_worst_point_;
@@ -147,7 +146,7 @@ K_Means::K_Means(Data *data) : data_(data) {
     clusters_[i].centroid_ = data->GetCentroids()[i];
   }
 
-  // Initializing variables saves time
+  // Making copies of these variables saves time
   num_of_points_ = data->GetNumOfPoints();
   num_of_clusters_ = data->GetNumOfClusters();
   points_ = data->GetPoints();
@@ -190,8 +189,7 @@ void K_Means::Run() {
       iter_start = std::chrono::high_resolution_clock::now();
 #endif
 
-      if (CalculateSSE(j))
-        break;
+      if (CalculateSSE(j)) break;
 
 #if CHECK_PERFORMANCE
       iter_stop = std::chrono::high_resolution_clock::now();

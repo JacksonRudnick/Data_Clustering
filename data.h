@@ -3,8 +3,8 @@
 // https://google.github.io/styleguide/cppguide.html
 // Copyright 2025 Jackson Rudnick
 
-#ifndef DATA_H
-#define DATA_H
+#ifndef DATA_H_
+#define DATA_H_
 
 #include <algorithm>
 #include <ctime>
@@ -14,10 +14,10 @@
 #include <string>
 #include <vector>
 
-#include "config.h"
+#include "./config.h"
 
 class Data {
-private:
+ private:
   std::string kfile_path_;
   int num_of_points_;
   int num_of_dimensions_;
@@ -32,7 +32,7 @@ private:
 
   void ReadPoints();
 
-public:
+ public:
   Data(const std::string &file_path, int num_of_clusters, int max_iterations,
        int num_of_runs, double convergence_threshold);
 
@@ -51,4 +51,4 @@ public:
   void ExportCentroids();
 };
 
-#endif //  DATA_H
+#endif  // DATA_H_
