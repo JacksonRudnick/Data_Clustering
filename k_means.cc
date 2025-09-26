@@ -1,15 +1,16 @@
-//Author: Jackson Rudnick
-//Coding Style Standards
-//https://google.github.io/styleguide/cppguide.html
+// Author: Jackson Rudnick
+// Coding Style Standards
+// https://google.github.io/styleguide/cppguide.html
+// Copyright 2025 Jackson Rudnick
 
 /*
 Overview of the steps:
-Assign points to clusters 
+Assign points to clusters
   - Get points
   - Determine Euclidean distance to each centroid
   - Assign point to cluster with closest centroid
 
-Evaluate quality of clusters based on SSE 
+Evaluate quality of clusters based on SSE
   - Calculate SSE of points in clusters
 
 Move clusters based on mean of assigned points
@@ -18,22 +19,26 @@ Move clusters based on mean of assigned points
 Repeat
 */
 
-#include "k_means.h"
+#include <iostream>
+#include <limits>
+#include <vector>
+
+#include "./k_means.h"
 
 void K_Means::AssignPointsToClusters() {
-  //clear points from previous iteration
+  // clear points from previous iteration
   for (int i = 0; i < clusters_.size(); i++) {
     clusters_[i].points_.clear();
   }
 
-  //assign points to clusters O(n*k*d)
+  // assign points to clusters O(n*k*d)
   for (int i = 0; i < num_of_points_; i++) {
     double lowest_distance = std::numeric_limits<double>::max();
 
     int centroid = 0;
     std::vector<double> curr_point = points_[i];
 
-    //check distance between each point and each cluster
+    // check distance between each point and each cluster
     for (int j = 0; j < num_of_clusters_; j++) {
       double new_distance = GetDistance(&curr_point, &clusters_[j].centroid_);
       if (new_distance < lowest_distance) {
@@ -43,10 +48,11 @@ void K_Means::AssignPointsToClusters() {
     }
     clusters_[centroid].points_.push_back(curr_point);
 
-    //update worst distance of a cluster
+    // update worst distance of a cluster
     if (lowest_distance > clusters_[centroid].worst_distance_) {
       clusters_[centroid].worst_distance_ = lowest_distance;
-      clusters_[centroid].pos_of_worst_point_ = clusters_[centroid].points_.size()-1;
+      clusters_[centroid].pos_of_worst_point_ =
+          clusters_[centroid].points_.size() - 1;
     }
   }
 }
@@ -59,8 +65,9 @@ bool K_Means::CalculateSSE(int iter) {
     }
   }
 
-  std::cout << "Iteration " << iter+1 << ": SSE = " << sse << std::endl;
-  if (data_->GetConvergenceThreshold() >= (sse_ - sse)) return true;
+  std::cout << "Iteration " << iter + 1 << ": SSE = " << sse << std::endl;
+  if (data_->GetConvergenceThreshold() >= (sse_ - sse))
+    return true;
   sse_ = sse;
 
   return false;
@@ -88,32 +95,36 @@ void K_Means::UpdateCentroids() {
 void K_Means::CheckEmptyClusters() {
   for (int i = 0; i < num_of_clusters_; i++) {
     if (clusters_[i].points_.empty()) {
-      //store to reduce multiple memory accesses
+      // store to reduce multiple memory accesses
       double worst_distance = 0;
       int pos_of_worst_point = -1;
       int cluster_with_worst_point = -1;
 
       for (int j = 0; j < num_of_clusters_; j++) {
-        if (!clusters_[j].points_.empty() && clusters_[j].worst_distance_ > worst_distance) {
+        if (!clusters_[j].points_.empty() &&
+            clusters_[j].worst_distance_ > worst_distance) {
           worst_distance = clusters_[j].worst_distance_;
           pos_of_worst_point = clusters_[j].pos_of_worst_point_;
           cluster_with_worst_point = j;
         }
       }
 
-      //update singleton cluster
+      // update singleton cluster
       if (pos_of_worst_point != -1) {
-        clusters_[i].points_.push_back(clusters_[cluster_with_worst_point].points_[pos_of_worst_point]);
+        clusters_[i].points_.push_back(
+            clusters_[cluster_with_worst_point].points_[pos_of_worst_point]);
         clusters_[i].centroid_ = clusters_[i].points_[0];
 
-        clusters_[cluster_with_worst_point].points_.erase(clusters_[cluster_with_worst_point].points_.begin()+pos_of_worst_point);
+        clusters_[cluster_with_worst_point].points_.erase(
+            clusters_[cluster_with_worst_point].points_.begin() +
+            pos_of_worst_point);
       }
     }
   }
 }
 
-//Euclidean Distance Function
-double K_Means::GetDistance(std::vector<double>* p1, std::vector<double>* p2) {
+// Euclidean Distance Function
+double K_Means::GetDistance(std::vector<double> *p1, std::vector<double> *p2) {
   int size1 = p1->size();
 
   if (size1 != p2->size()) {
@@ -136,92 +147,96 @@ K_Means::K_Means(Data *data) : data_(data) {
     clusters_[i].centroid_ = data->GetCentroids()[i];
   }
 
-  //Initializing variables saves time
+  // Initializing variables saves time
   num_of_points_ = data->GetNumOfPoints();
   num_of_clusters_ = data->GetNumOfClusters();
   points_ = data->GetPoints();
 }
 
 void K_Means::InitializeClusters() {
-    clusters_.clear();
-    clusters_.resize(num_of_clusters_);
-    for (int i = 0; i < num_of_clusters_; i++)
-    {
-      clusters_[i].centroid_ = data_->GetCentroids()[i];
-    }
+  clusters_.clear();
+  clusters_.resize(num_of_clusters_);
+  for (int i = 0; i < num_of_clusters_; i++) {
+    clusters_[i].centroid_ = data_->GetCentroids()[i];
+  }
 }
 
 void K_Means::Run() {
   for (int i = 0; i < data_->GetNumOfRuns(); i++) {
     sse_ = std::numeric_limits<double>::max();
 
-    std::cout << "\nRun " << i+1 << "\n-----\n";
+    std::cout << "\nRun " << i + 1 << "\n-----\n";
 
     data_->SelectCentroids();
     InitializeClusters();
 
     for (int j = 0; j < data_->GetMaxIterations(); j++) {
-      #if CHECK_PERFORMANCE
+#if CHECK_PERFORMANCE
       auto iter_start = std::chrono::high_resolution_clock::now();
-      #endif
+#endif
 
       AssignPointsToClusters();
 
-      #if CHECK_PERFORMANCE
+#if CHECK_PERFORMANCE
       auto iter_stop = std::chrono::high_resolution_clock::now();
-      auto iter_duration = std::chrono::duration_cast<std::chrono::milliseconds>(iter_stop - iter_start);
-      std::cout << "Assigning points took: " 
-                << iter_duration.count() << " milliseconds" << std::endl;
-      #endif
+      auto iter_duration =
+          std::chrono::duration_cast<std::chrono::milliseconds>(iter_stop -
+                                                                iter_start);
+      std::cout << "Assigning points took: " << iter_duration.count()
+                << " milliseconds" << std::endl;
+#endif
 
-      #if CHECK_PERFORMANCE
+#if CHECK_PERFORMANCE
       iter_start = std::chrono::high_resolution_clock::now();
-      #endif
-      
+#endif
+
       if (CalculateSSE(j))
         break;
-      
-      #if CHECK_PERFORMANCE
-      iter_stop = std::chrono::high_resolution_clock::now();
-      iter_duration = std::chrono::duration_cast<std::chrono::milliseconds>(iter_stop - iter_start);
-      std::cout << "Calculating SSE took: " 
-                << iter_duration.count() << " milliseconds" << std::endl;
-      #endif
 
-      #if CHECK_PERFORMANCE
+#if CHECK_PERFORMANCE
+      iter_stop = std::chrono::high_resolution_clock::now();
+      iter_duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+          iter_stop - iter_start);
+      std::cout << "Calculating SSE took: " << iter_duration.count()
+                << " milliseconds" << std::endl;
+#endif
+
+#if CHECK_PERFORMANCE
       iter_start = std::chrono::high_resolution_clock::now();
-      #endif
-      
+#endif
+
       UpdateCentroids();
-      
-      #if CHECK_PERFORMANCE
-      iter_stop = std::chrono::high_resolution_clock::now();
-      iter_duration = std::chrono::duration_cast<std::chrono::milliseconds>(iter_stop - iter_start);
-      std::cout << "Updating centroids took: " 
-                << iter_duration.count() << " milliseconds" << std::endl;
-      #endif
 
-      #if CHECK_PERFORMANCE
+#if CHECK_PERFORMANCE
+      iter_stop = std::chrono::high_resolution_clock::now();
+      iter_duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+          iter_stop - iter_start);
+      std::cout << "Updating centroids took: " << iter_duration.count()
+                << " milliseconds" << std::endl;
+#endif
+
+#if CHECK_PERFORMANCE
       iter_start = std::chrono::high_resolution_clock::now();
-      #endif
+#endif
 
       CheckEmptyClusters();
-    
-      #if CHECK_PERFORMANCE
+
+#if CHECK_PERFORMANCE
       iter_stop = std::chrono::high_resolution_clock::now();
-      iter_duration = std::chrono::duration_cast<std::chrono::milliseconds>(iter_stop - iter_start);
-      std::cout << "Check empty clusters took: " 
-                << iter_duration.count() << " milliseconds" << std::endl;
-      #endif
+      iter_duration = std::chrono::duration_cast<std::chrono::milliseconds>(
+          iter_stop - iter_start);
+      std::cout << "Check empty clusters took: " << iter_duration.count()
+                << " milliseconds" << std::endl;
+#endif
     }
 
-    //keep track of best run
+    // keep track of best run
     if (sse_ < lowest_sse_) {
       lowest_sse_ = sse_;
-      lowest_sse_run_ = i+1;
+      lowest_sse_run_ = i + 1;
     }
   }
 
-  std::cout << "\nBest Run: " << lowest_sse_run_ << ": SSE = " << lowest_sse_ 
-    << std::endl;
+  std::cout << "\nBest Run: " << lowest_sse_run_ << ": SSE = " << lowest_sse_
+            << std::endl;
 }

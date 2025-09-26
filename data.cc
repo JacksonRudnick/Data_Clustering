@@ -1,51 +1,39 @@
-//Author: Jackson Rudnick
-//Coding Style Standards
-//https://google.github.io/styleguide/cppguide.html
+// Author: Jackson Rudnick
+// Coding Style Standards
+// https://google.github.io/styleguide/cppguide.html
+// Copyright 2025 Jackson Rudnick
 
-#include "data.h"
+#include <iostream>
+#include <string>
+#include <vector>
 
-//Define class variables and conduct main class code
-Data::Data(const std::string& file_path, int num_of_clusters, int max_iterations, 
-           int num_of_runs, double convergence_threshold)
-           : kfile_path_(file_path), num_of_clusters_(num_of_clusters), 
-           max_iterations_(max_iterations), 
-           num_of_runs_(num_of_runs),
-           convergence_threshold_(convergence_threshold) {
+#include "./data.h"
+
+// Define class variables and conduct main class code
+Data::Data(const std::string &file_path, int num_of_clusters,
+           int max_iterations, int num_of_runs, double convergence_threshold)
+    : kfile_path_(file_path), num_of_clusters_(num_of_clusters),
+      max_iterations_(max_iterations), num_of_runs_(num_of_runs),
+      convergence_threshold_(convergence_threshold) {
   ReadPoints();
   SelectCentroids();
 }
 
-int Data::GetNumOfPoints() {
-  return num_of_points_;
-}
+int Data::GetNumOfPoints() { return num_of_points_; }
 
-int Data::GetNumOfDimensions() {
-  return num_of_dimensions_;
-}
+int Data::GetNumOfDimensions() { return num_of_dimensions_; }
 
-int Data::GetNumOfClusters() {
-  return num_of_clusters_;
-}
+int Data::GetNumOfClusters() { return num_of_clusters_; }
 
-int Data::GetMaxIterations() {
-  return max_iterations_;
-}
+int Data::GetMaxIterations() { return max_iterations_; }
 
-int Data::GetNumOfRuns() {
-  return num_of_runs_;
-}
+int Data::GetNumOfRuns() { return num_of_runs_; }
 
-double Data::GetConvergenceThreshold() {
-  return convergence_threshold_;
-}
+double Data::GetConvergenceThreshold() { return convergence_threshold_; }
 
-std::vector<std::vector<double>> Data::GetPoints() {
-  return points_;
-}
+std::vector<std::vector<double>> Data::GetPoints() { return points_; }
 
-std::vector<std::vector<double>> Data::GetCentroids() {
-  return centroids_;
-}
+std::vector<std::vector<double>> Data::GetCentroids() { return centroids_; }
 
 void Data::SetCentroids(std::vector<std::vector<double>> new_centroids) {
   centroids_.clear();
@@ -54,8 +42,8 @@ void Data::SetCentroids(std::vector<std::vector<double>> new_centroids) {
   }
 }
 
-//select random centroids based on how many clusters there are
-//read points must be ran before this is called
+// select random centroids based on how many clusters there are
+// read points must be ran before this is called
 void Data::SelectCentroids() {
   if (!num_of_points_ || !num_of_dimensions_) {
     std::cout << "readPoints() must be ran before selectCentroids() is called.";
@@ -66,7 +54,7 @@ void Data::SelectCentroids() {
     centroids_.clear();
   }
 
-  std::uniform_int_distribution<> distrib(0, num_of_points_-1); 
+  std::uniform_int_distribution<> distrib(0, num_of_points_ - 1);
 
   std::vector<int> used_indices;
 
@@ -92,17 +80,17 @@ void Data::ReadPoints() {
     std::cout << "File failed to open. PATH :: " << kfile_path_ << std::endl;
   }
 
-  //first two entries in file are points and dimensions
+  // first two entries in file are points and dimensions
   file >> num_of_points_;
   file >> num_of_dimensions_;
 
   points_.resize(num_of_points_, std::vector<double>(num_of_dimensions_));
 
-	for (int i = 0; i < num_of_points_; i++) {
-		for (int j = 0; j < num_of_dimensions_; j++) {
+  for (int i = 0; i < num_of_points_; i++) {
+    for (int j = 0; j < num_of_dimensions_; j++) {
       file >> points_[i][j];
     }
-	}
+  }
 }
 
 void Data::PrintData() {
@@ -124,10 +112,13 @@ void Data::PrintCentroids() {
 }
 
 void Data::ExportCentroids() {
-  //take original file and replace it with base file name + .output
-  std::ofstream output_stream("outputs/"+kfile_path_.substr(kfile_path_.
-    find_last_of("/")+1,kfile_path_.find_last_of(".")-kfile_path_.
-    find_last_of("/")-1)+".output");
+  // take original file and replace it with base file name + .output
+  std::ofstream output_stream(
+      "outputs/" +
+      kfile_path_.substr(kfile_path_.find_last_of("/") + 1,
+                         kfile_path_.find_last_of(".") -
+                             kfile_path_.find_last_of("/") - 1) +
+      ".output");
 
   for (int i = 0; i < num_of_clusters_; i++) {
     for (int j = 0; j < num_of_dimensions_; j++) {
