@@ -3,6 +3,22 @@
 // https://google.github.io/styleguide/cppguide.html
 // Copyright 2025 Jackson Rudnick
 
+/*
+Can k-means initialized uniformly at random encounter empty clusters in any
+iteration?
+
+No, it should be impossible for k-means initialized uniformly at random to
+encounter empty clusters in any iteration. This is because, in each iteration,
+centroids are updated based on the mean of assigned points, and points are
+assigned based on the nearest cluster. This means that as long as there are
+points in a cluster, the centroid will move towards at least one point,
+preventing the cluster from becoming empty. And since the initial centroids are
+points themselves, each cluster starts with at least one point. There is a
+possibility that a singleton could become empty if there was another centroid at
+the same point but with the new implementation of checking for singleton
+clusters this is avoided.
+*/
+
 #include <chrono>
 #include <ctime>
 #include <fstream>

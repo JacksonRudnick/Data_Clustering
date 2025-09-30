@@ -10,13 +10,11 @@ file2.write(str(num_of_points) + " " + str(num_of_dimensions) + "\n")
 
 lines = file.readlines()
 
-i = 0
+i = 1
 
 for line in lines:
     file2.write(line)
     if i % 5 == 0 and i != 0:
-        file2.write(line)
-        file2.write(line)
-        file2.write(line)
-        file2.write(line)
+        for j in range(9):
+            file2.write(line)
     i += 1

@@ -150,7 +150,7 @@ void K_Means::UpdateWorstDistance(int cluster_index) {
 }
 
 // Euclidean Distance Function
-double K_Means::GetDistance(std::vector<double> *p1, std::vector<double> *p2) {
+double K_Means::GetDistance(std::vector<double>* p1, std::vector<double>* p2) {
   int size1 = p1->size();
 
   if (size1 != p2->size()) {
@@ -167,13 +167,11 @@ double K_Means::GetDistance(std::vector<double> *p1, std::vector<double> *p2) {
   return distance;
 }
 
-K_Means::K_Means(Data *data) : data_(data) {
+K_Means::K_Means(Data* data) : data_(data) {
   // Making copies of these variables saves time
   num_of_points_ = data->GetNumOfPoints();
   num_of_clusters_ = data->GetNumOfClusters();
   points_ = data->GetPoints();
-
-  clusters_.resize(num_of_clusters_);
 }
 
 void K_Means::InitializeClusters() {
