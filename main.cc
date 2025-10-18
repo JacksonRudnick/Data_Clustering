@@ -21,6 +21,7 @@ clusters this is avoided.
 
 #include <chrono>
 #include <ctime>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -51,6 +52,9 @@ int main(int argc, char *argv[]) {
   Data *data = ReadArgs(argc, argv);
 
 #if OUT_TO_FILE
+  std::filesystem::create_directory("outputs");
+
+  std::streambuf *original_cout_buf = nullptr;
   std::ofstream output_stream(
       "outputs/" +
       ((std::string)argv[1])
@@ -59,7 +63,7 @@ int main(int argc, char *argv[]) {
                       ((std::string)argv[1]).find_last_of("/") - 1) +
       ".output");
 
-  std::cout.rdbuf(output_stream.rdbuf());
+  original_cout_buf = std::cout.rdbuf(output_stream.rdbuf());
 #endif
 
   K_Means *k_means = new K_Means(data);
@@ -77,6 +81,16 @@ int main(int argc, char *argv[]) {
   std::cout << "Clustering took: " << duration.count() << " milliseconds"
             << std::endl;
 #endif
+
+// fix cout buffer back to original
+#if OUT_TO_FILE
+  if (original_cout_buf) {
+    std::cout.rdbuf(original_cout_buf);
+  }
+#endif
+
+  delete k_means;
+  delete data;
 
   return 0;
 }
