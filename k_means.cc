@@ -77,25 +77,11 @@ bool K_Means::CalculateSSE(int iter) {
 void K_Means::UpdateCentroids() {
   for (int i = 0; i < clusters_.size(); i++) {
     if (clusters_[i].points_.empty()) {
-      // Skip empty clusters - centroid will be handled by
-      // CheckForSingletonClusters
+      // skip empty clusters
       continue;
     }
 
-    std::vector<double> new_centroid;
-    new_centroid.resize(clusters_[i].centroid_.size());
-
-    for (int j = 0; j < clusters_[i].points_.size(); j++) {
-      for (int k = 0; k < clusters_[i].points_[j].size(); k++) {
-        new_centroid[k] += clusters_[i].points_[j][k];
-      }
-    }
-
-    for (int j = 0; j < new_centroid.size(); j++) {
-      new_centroid[j] /= clusters_[i].points_.size();
-    }
-
-    clusters_[i].centroid_ = new_centroid;
+    clusters_[i].centroid_ = CalculateCentroid(clusters_[i]);
   }
 }
 
@@ -149,24 +135,6 @@ void K_Means::UpdateWorstDistance(int cluster_index) {
   }
 }
 
-// Euclidean Distance Function
-double K_Means::GetDistance(std::vector<double>* p1, std::vector<double>* p2) {
-  int size1 = p1->size();
-
-  if (size1 != p2->size()) {
-    std::cout << "Error" << std::endl;
-    std::exit(0);
-  }
-
-  double distance = 0;
-  for (int i = 0; i < size1; i++) {
-    double diff = (*p1)[i] - (*p2)[i];
-    distance += diff * diff;
-  }
-
-  return distance;
-}
-
 K_Means::K_Means(Data* data) : data_(data) {
   // Making copies of these variables saves time
   num_of_points_ = data->GetNumOfPoints();
@@ -190,7 +158,7 @@ void K_Means::Run() {
 
     std::cout << "\nRun " << i + 1 << "\n-----\n";
 
-    data_->SelectCentroids();
+    data_->SelectCentroidsAlt();
     InitializeClusters();
 
     for (int j = 0; j < data_->GetMaxIterations(); j++) {

@@ -47,8 +47,10 @@ class Data {
   void SetCentroids(std::vector<std::vector<double>> new_centroids);
   void PrintData();
   void PrintCentroids();
-  void SelectCentroids();
+  void SelectCentroids();     // random selection
+  void SelectCentroidsAlt();  // random partition
   void ExportCentroids();
+  void NormalizePoints();
 };
 
 #endif  // DATA_H_

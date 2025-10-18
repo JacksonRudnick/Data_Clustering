@@ -5,9 +5,13 @@
 
 #include "./data.h"
 
+#include <algorithm>
 #include <iostream>
 #include <string>
 #include <vector>
+
+#include "./cluster.h"
+#include "./math.h"
 
 // Define class variables and conduct main class code
 Data::Data(const std::string &file_path, int num_of_clusters,
@@ -18,6 +22,7 @@ Data::Data(const std::string &file_path, int num_of_clusters,
       num_of_runs_(num_of_runs),
       convergence_threshold_(convergence_threshold) {
   ReadPoints();
+  NormalizePoints();
 }
 
 int Data::GetNumOfPoints() { return num_of_points_; }
@@ -74,6 +79,30 @@ void Data::SelectCentroids() {
   }
 }
 
+void Data::SelectCentroidsAlt() {
+  if (!num_of_points_ || !num_of_dimensions_) {
+    std::cout << "readPoints() must be ran before selectCentroids() is called.";
+    std::exit(1);
+  }
+
+  if (!centroids_.empty()) {
+    centroids_.clear();
+  }
+
+  std::uniform_int_distribution<> distrib(0, num_of_clusters_ - 1);
+
+  std::vector<Cluster> temp_clusters(num_of_clusters_);
+
+  for (int i = 0; i < num_of_points_; i++) {
+    int cluster_index = distrib(gen_);
+    temp_clusters[cluster_index].points_.push_back(points_[i]);
+  }
+
+  for (int i = 0; i < num_of_clusters_; i++) {
+    centroids_.push_back(CalculateCentroid(temp_clusters[i]));
+  }
+}
+
 void Data::ReadPoints() {
   std::ifstream file(kfile_path_);
 
@@ -90,6 +119,30 @@ void Data::ReadPoints() {
   for (int i = 0; i < num_of_points_; i++) {
     for (int j = 0; j < num_of_dimensions_; j++) {
       file >> points_[i][j];
+    }
+  }
+}
+
+void Data::NormalizePoints() {
+  for (int j = 0; j < num_of_dimensions_; j++) {
+    double min_val = points_[0][j];
+    double max_val = points_[0][j];
+
+    for (int i = 1; i < num_of_points_; i++) {
+      if (points_[i][j] < min_val) {
+        min_val = points_[i][j];
+      }
+      if (points_[i][j] > max_val) {
+        max_val = points_[i][j];
+      }
+    }
+
+    double range = max_val - min_val;
+
+    range = std::max(range, 1e-9);  // prevent division by zero
+
+    for (int i = 0; i < num_of_points_; i++) {
+      points_[i][j] = (points_[i][j] - min_val) / range;
     }
   }
 }

@@ -12,15 +12,10 @@
 #include <thread>
 #include <vector>
 
+#include "./cluster.h"
 #include "./config.h"
 #include "./data.h"
-
-struct Cluster {
-  std::vector<std::vector<double>> points_;
-  std::vector<double> centroid_;
-  double worst_distance_;
-  int pos_of_worst_point_;
-};
+#include "./math.h"
 
 class K_Means {
  private:
@@ -39,7 +34,6 @@ class K_Means {
   void InitializeClusters();
   void CheckForSingletonClusters();
   void UpdateWorstDistance(int cluster_index);
-  double GetDistance(std::vector<double> *p1, std::vector<double> *p2);
 
  public:
   explicit K_Means(Data *data);
