@@ -51,19 +51,32 @@ Data *ReadArgs(int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
   Data *data = ReadArgs(argc, argv);
 
+#if OUT_TO_FILE || !VERBOSE_OUTPUT
+  std::string file_name =
+      ((std::string)argv[1])
+          .substr(((std::string)argv[1]).find_last_of("/") + 1,
+                  ((std::string)argv[1]).find_last_of(".") -
+                      ((std::string)argv[1]).find_last_of("/") - 1);
+#endif
+
 #if OUT_TO_FILE
   std::filesystem::create_directory("outputs");
 
   std::streambuf *original_cout_buf = nullptr;
-  std::ofstream output_stream(
-      "outputs/" +
-      ((std::string)argv[1])
-          .substr(((std::string)argv[1]).find_last_of("/") + 1,
-                  ((std::string)argv[1]).find_last_of(".") -
-                      ((std::string)argv[1]).find_last_of("/") - 1) +
-      ".output");
+  std::ofstream output_stream("outputs/" + file_name + ".csv");
+
+  if (!output_stream.is_open()) {
+    std::cout << "Error opening output file." << std::endl;
+    return 1;
+  }
 
   original_cout_buf = std::cout.rdbuf(output_stream.rdbuf());
+#endif
+
+#if !VERBOSE_OUTPUT
+  std::cout << "Dataset,Normalization,Initialization,Best Initial SSE, Best "
+               "Final SSE, Best # of Iterations\n";
+  std::cout << file_name << ",";
 #endif
 
   K_Means *k_means = new K_Means(data);
@@ -80,6 +93,10 @@ int main(int argc, char *argv[]) {
       std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
   std::cout << "Clustering took: " << duration.count() << " milliseconds"
             << std::endl;
+#endif
+
+#if !VERBOSE_OUTPUT
+  k_means->exportResults();
 #endif
 
 // fix cout buffer back to original

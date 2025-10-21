@@ -24,6 +24,7 @@ class Data {
   int num_of_clusters_;
   int max_iterations_;
   int num_of_runs_;
+  double initial_sse_;
   double convergence_threshold_;
   std::vector<std::vector<double>> points_;
   std::vector<std::vector<double>> centroids_;
@@ -41,6 +42,7 @@ class Data {
   int GetNumOfClusters();
   int GetMaxIterations();
   int GetNumOfRuns();
+  double GetInitialSSE();
   double GetConvergenceThreshold();
   std::vector<std::vector<double>> GetPoints();
   std::vector<std::vector<double>> GetCentroids();

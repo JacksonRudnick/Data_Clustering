@@ -35,6 +35,8 @@ int Data::GetMaxIterations() { return max_iterations_; }
 
 int Data::GetNumOfRuns() { return num_of_runs_; }
 
+double Data::GetInitialSSE() { return initial_sse_; }
+
 double Data::GetConvergenceThreshold() { return convergence_threshold_; }
 
 std::vector<std::vector<double>> Data::GetPoints() { return points_; }
@@ -100,7 +102,10 @@ void Data::SelectCentroidsAlt() {
 
   for (int i = 0; i < num_of_clusters_; i++) {
     centroids_.push_back(CalculateCentroid(temp_clusters[i]));
+    temp_clusters[i].centroid_ = centroids_[i];
   }
+
+  initial_sse_ = CalculateSSE(temp_clusters);
 }
 
 void Data::ReadPoints() {

@@ -59,21 +59,6 @@ void K_Means::AssignPointsToClusters() {
   }
 }
 
-bool K_Means::CalculateSSE(int iter) {
-  double sse = 0.0;
-  for (int i = 0; i < clusters_.size(); i++) {
-    for (int j = 0; j < clusters_[i].points_.size(); j++) {
-      sse += GetDistance(&clusters_[i].points_[j], &clusters_[i].centroid_);
-    }
-  }
-
-  std::cout << "Iteration " << iter + 1 << ": SSE = " << sse << std::endl;
-  if (data_->GetConvergenceThreshold() >= (sse_ - sse)) return true;
-  sse_ = sse;
-
-  return false;
-}
-
 void K_Means::UpdateCentroids() {
   for (int i = 0; i < clusters_.size(); i++) {
     if (clusters_[i].points_.empty()) {
@@ -135,7 +120,8 @@ void K_Means::UpdateWorstDistance(int cluster_index) {
   }
 }
 
-K_Means::K_Means(Data* data) : data_(data) {
+K_Means::K_Means(Data* data, bool use_random_partitioning)
+    : data_(data), use_random_partitioning_(use_random_partitioning) {
   // Making copies of these variables saves time
   num_of_points_ = data->GetNumOfPoints();
   num_of_clusters_ = data->GetNumOfClusters();
@@ -156,12 +142,22 @@ void K_Means::Run() {
   for (int i = 0; i < data_->GetNumOfRuns(); i++) {
     sse_ = std::numeric_limits<double>::max();
 
+#if VERBOSE_OUTPUT
     std::cout << "\nRun " << i + 1 << "\n-----\n";
+#endif
 
-    data_->SelectCentroidsAlt();
+    if (use_random_partitioning_)
+      data_->SelectCentroidsAlt();
+    else
+      data_->SelectCentroids();
+
+    if (best_initial_sse_ > data_->GetInitialSSE()) {
+      best_initial_sse_ = data_->GetInitialSSE();
+    }
+
     InitializeClusters();
 
-    for (int j = 0; j < data_->GetMaxIterations(); j++) {
+    for (int iter = 0; iter < data_->GetMaxIterations(); iter++) {
 #if CHECK_PERFORMANCE
       auto iter_start = std::chrono::high_resolution_clock::now();
 #endif
@@ -181,7 +177,21 @@ void K_Means::Run() {
       iter_start = std::chrono::high_resolution_clock::now();
 #endif
 
-      if (CalculateSSE(j)) break;
+      double sse = CalculateSSE(clusters_);
+
+#if VERBOSE_OUTPUT
+      std::cout << "Iteration " << iter + 1 << ": SSE = " << sse << std::endl;
+#endif
+
+      if (data_->GetConvergenceThreshold() >= (sse_ - sse)) {
+        sse_ = sse;
+        if (iter + 1 < best_num_of_iterations_) {
+          best_num_of_iterations_ = iter + 1;
+        }
+
+        break;
+      }
+      sse_ = sse;
 
 #if CHECK_PERFORMANCE
       iter_stop = std::chrono::high_resolution_clock::now();
@@ -221,12 +231,25 @@ void K_Means::Run() {
     }
 
     // keep track of best run
-    if (sse_ < lowest_sse_) {
-      lowest_sse_ = sse_;
-      lowest_sse_run_ = i + 1;
+    if (sse_ < lowest_final_sse_) {
+      lowest_final_sse_ = sse_;
+      lowest_final_sse_run_ = i + 1;
     }
   }
 
-  std::cout << "\nBest Run: " << lowest_sse_run_ << ": SSE = " << lowest_sse_
-            << std::endl;
+#if VERBOSE_OUTPUT
+  std::cout << "\nBest Run: " << lowest_final_sse_run_
+            << ": SSE = " << lowest_final_sse_ << std::endl;
+#endif
+}
+
+void K_Means::exportResults() {
+  if (use_random_partitioning_) {
+    std::cout << "Min-Max Normalization,Random Partitioning,";
+  } else {
+    std::cout << "Min-Max Normalization,Random Initialization,";
+  }
+
+  std::cout << best_initial_sse_ << "," << lowest_final_sse_ << ","
+            << best_num_of_iterations_ << "\n";
 }

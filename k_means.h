@@ -19,26 +19,33 @@
 
 class K_Means {
  private:
+  bool use_random_partitioning_;
+
   int num_of_points_;
   int num_of_clusters_;
   std::vector<std::vector<double>> points_;
 
-  int lowest_sse_run_;
-  double lowest_sse_ = std::numeric_limits<double>::max();
+  int lowest_final_sse_run_;
+  double lowest_final_sse_ = std::numeric_limits<double>::max();
   double sse_;
+
+  double best_initial_sse_ = std::numeric_limits<double>::max();
+  int best_num_of_iterations_ = std::numeric_limits<int>::max();
+
   std::vector<Cluster> clusters_;
+
   Data *data_;
   void AssignPointsToClusters();
-  bool CalculateSSE(int iter);
   void UpdateCentroids();
   void InitializeClusters();
   void CheckForSingletonClusters();
   void UpdateWorstDistance(int cluster_index);
 
  public:
-  explicit K_Means(Data *data);
+  explicit K_Means(Data *data, bool use_random_partitioning = true);
 
   void Run();
+  void exportResults();
 };
 
 #endif  // K_MEANS_H_

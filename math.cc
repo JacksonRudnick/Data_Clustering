@@ -34,3 +34,14 @@ std::vector<double> CalculateCentroid(const Cluster& cluster) {
 
   return new_centroid;
 }
+
+double CalculateSSE(std::vector<Cluster> clusters) {
+  double sse = 0.0;
+  for (int i = 0; i < clusters.size(); i++) {
+    for (int j = 0; j < clusters[i].points_.size(); j++) {
+      sse += GetDistance(&clusters[i].points_[j], &clusters[i].centroid_);
+    }
+  }
+
+  return sse;
+}
