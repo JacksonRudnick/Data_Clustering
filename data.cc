@@ -35,6 +35,12 @@ int Data::GetMaxIterations() { return max_iterations_; }
 
 int Data::GetNumOfRuns() { return num_of_runs_; }
 
+std::string Data::GetFileName() {
+  return kfile_path_.substr(
+      kfile_path_.find_last_of("/") + 1,
+      kfile_path_.find_last_of(".") - kfile_path_.find_last_of("/") - 1);
+}
+
 double Data::GetInitialSSE() { return initial_sse_; }
 
 double Data::GetConvergenceThreshold() { return convergence_threshold_; }
@@ -101,8 +107,8 @@ void Data::SelectCentroidsAlt() {
   }
 
   for (int i = 0; i < num_of_clusters_; i++) {
-    centroids_.push_back(CalculateCentroid(temp_clusters[i]));
-    temp_clusters[i].centroid_ = centroids_[i];
+    CalculateCentroid(temp_clusters[i]);
+    centroids_.push_back(temp_clusters[i].centroid_);
   }
 
   initial_sse_ = CalculateSSE(temp_clusters);

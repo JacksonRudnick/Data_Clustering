@@ -42,6 +42,7 @@ class Data {
   int GetNumOfClusters();
   int GetMaxIterations();
   int GetNumOfRuns();
+  std::string GetFileName();
   double GetInitialSSE();
   double GetConvergenceThreshold();
   std::vector<std::vector<double>> GetPoints();

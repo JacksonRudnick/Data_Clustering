@@ -12,7 +12,7 @@
 #include "./cluster.h"
 
 double GetDistance(std::vector<double>* p1, std::vector<double>* p2);
-std::vector<double> CalculateCentroid(const Cluster& cluster);
+void CalculateCentroid(Cluster& cluster);
 double CalculateSSE(std::vector<Cluster> clusters);
 
 #endif  // MATH_H_

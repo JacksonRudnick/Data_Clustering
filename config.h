@@ -6,6 +6,7 @@
 #ifndef CONFIG_H_
 #define CONFIG_H_
 
+#define CLUSTER_ALL_DATA 1
 #define OUT_TO_FILE 1
 #define VERBOSE_OUTPUT 0
 #define CHECK_PERFORMANCE 0

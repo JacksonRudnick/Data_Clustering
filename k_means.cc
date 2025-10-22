@@ -38,17 +38,17 @@ void K_Means::AssignPointsToClusters() {
     double lowest_distance = std::numeric_limits<double>::max();
 
     int centroid = 0;
-    std::vector<double> curr_point = points_[i];
+    std::vector<double>* curr_point = &points_[i];
 
     // check distance between each point and each cluster
     for (int j = 0; j < num_of_clusters_; j++) {
-      double new_distance = GetDistance(&curr_point, &clusters_[j].centroid_);
+      double new_distance = GetDistance(curr_point, &clusters_[j].centroid_);
       if (new_distance < lowest_distance) {
         lowest_distance = new_distance;
         centroid = j;
       }
     }
-    clusters_[centroid].points_.push_back(curr_point);
+    clusters_[centroid].points_.push_back(*curr_point);
 
     // update worst distance of a cluster
     if (lowest_distance > clusters_[centroid].worst_distance_) {
@@ -66,7 +66,7 @@ void K_Means::UpdateCentroids() {
       continue;
     }
 
-    clusters_[i].centroid_ = CalculateCentroid(clusters_[i]);
+    CalculateCentroid(clusters_[i]);
   }
 }
 
@@ -251,5 +251,5 @@ void K_Means::exportResults() {
   }
 
   std::cout << best_initial_sse_ << "," << lowest_final_sse_ << ","
-            << best_num_of_iterations_ << "\n";
+            << best_num_of_iterations_;
 }
