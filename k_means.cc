@@ -38,17 +38,17 @@ void K_Means::AssignPointsToClusters() {
     double lowest_distance = std::numeric_limits<double>::max();
 
     int centroid = 0;
-    std::vector<double>* curr_point = &points_[i];
+    std::vector<double>& curr_point = points_[i];
 
     // check distance between each point and each cluster
     for (int j = 0; j < num_of_clusters_; j++) {
-      double new_distance = GetDistance(curr_point, &clusters_[j].centroid_);
+      double new_distance = GetDistance(curr_point, clusters_[j].centroid_);
       if (new_distance < lowest_distance) {
         lowest_distance = new_distance;
         centroid = j;
       }
     }
-    clusters_[centroid].points_.push_back(*curr_point);
+    clusters_[centroid].points_.push_back(curr_point);
 
     // update worst distance of a cluster
     if (lowest_distance > clusters_[centroid].worst_distance_) {
@@ -111,8 +111,8 @@ void K_Means::UpdateWorstDistance(int cluster_index) {
 
   // check all of the points in the cluster to find the new worst distance
   for (int i = 0; i < clusters_[cluster_index].points_.size(); i++) {
-    double distance = GetDistance(&clusters_[cluster_index].points_[i],
-                                  &clusters_[cluster_index].centroid_);
+    double distance = GetDistance(clusters_[cluster_index].points_[i],
+                                  clusters_[cluster_index].centroid_);
     if (distance > clusters_[cluster_index].worst_distance_) {
       clusters_[cluster_index].worst_distance_ = distance;
       clusters_[cluster_index].pos_of_worst_point_ = i;
@@ -120,8 +120,8 @@ void K_Means::UpdateWorstDistance(int cluster_index) {
   }
 }
 
-K_Means::K_Means(Data* data, bool use_random_partitioning)
-    : data_(data), use_random_partitioning_(use_random_partitioning) {
+K_Means::K_Means(Data* data, const InitializationMethod initialization_method)
+    : data_(data), kinitialization_method_(initialization_method) {
   // Making copies of these variables saves time
   num_of_points_ = data->GetNumOfPoints();
   num_of_clusters_ = data->GetNumOfClusters();
@@ -146,14 +146,12 @@ void K_Means::Run() {
     std::cout << "\nRun " << i + 1 << "\n-----\n";
 #endif
 
-    if (use_random_partitioning_)
-      data_->SelectCentroidsAlt();
-    else
+    if (kinitialization_method_ == InitializationMethod::RANDOM_PARTITION)
+      data_->PartitionCentroids();
+    else if (kinitialization_method_ == InitializationMethod::RANDOM_SELECTION)
       data_->SelectCentroids();
-
-    if (best_initial_sse_ > data_->GetInitialSSE()) {
-      best_initial_sse_ = data_->GetInitialSSE();
-    }
+    else if (kinitialization_method_ == InitializationMethod::MAX_I_MIN)
+      data_->MaxIMinSelection();
 
     InitializeClusters();
 
@@ -178,6 +176,12 @@ void K_Means::Run() {
 #endif
 
       double sse = CalculateSSE(clusters_);
+
+      if (iter == 0) {
+        if (sse < best_initial_sse_) {
+          best_initial_sse_ = sse;
+        }
+      }
 
 #if VERBOSE_OUTPUT
       std::cout << "Iteration " << iter + 1 << ": SSE = " << sse << std::endl;
@@ -244,10 +248,19 @@ void K_Means::Run() {
 }
 
 void K_Means::exportResults() {
-  if (use_random_partitioning_) {
-    std::cout << "Min-Max Normalization,Random Partitioning,";
-  } else {
-    std::cout << "Min-Max Normalization,Random Initialization,";
+  if (data_->GetNormalizationMethod() == NormalizationMethod::Z_SCORE) {
+    std::cout << "Z-Score Normalization,";
+  } else if (data_->GetNormalizationMethod() == NormalizationMethod::MIN_MAX) {
+    std::cout << "Min-Max Normalization,";
+  }
+
+  if (kinitialization_method_ == InitializationMethod::RANDOM_PARTITION) {
+    std::cout << "Random Partitioning,";
+  } else if (kinitialization_method_ ==
+             InitializationMethod::RANDOM_SELECTION) {
+    std::cout << "Random Initialization,";
+  } else if (kinitialization_method_ == InitializationMethod::MAX_I_MIN) {
+    std::cout << "Max-I-Min Initialization,";
   }
 
   std::cout << best_initial_sse_ << "," << lowest_final_sse_ << ","

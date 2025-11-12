@@ -11,4 +11,13 @@
 #define VERBOSE_OUTPUT 0
 #define CHECK_PERFORMANCE 0
 
+enum class InitializationMethod {
+  RANDOM_SELECTION = 0,
+  RANDOM_PARTITION = 1,
+  MAX_I_MIN = 2,
+  COUNT
+};
+
+enum class NormalizationMethod { MIN_MAX = 0, Z_SCORE = 1, COUNT };
+
 #endif  // CONFIG_H_

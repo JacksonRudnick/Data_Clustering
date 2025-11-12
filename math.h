@@ -11,7 +11,7 @@
 
 #include "./cluster.h"
 
-double GetDistance(std::vector<double>* p1, std::vector<double>* p2);
+double GetDistance(std::vector<double>& p1, std::vector<double>& p2);
 void CalculateCentroid(Cluster& cluster);
 double CalculateSSE(std::vector<Cluster> clusters);
 

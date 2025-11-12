@@ -19,7 +19,7 @@
 
 class K_Means {
  private:
-  bool use_random_partitioning_;
+  const InitializationMethod kinitialization_method_;
 
   int num_of_points_;
   int num_of_clusters_;
@@ -42,7 +42,9 @@ class K_Means {
   void UpdateWorstDistance(int cluster_index);
 
  public:
-  explicit K_Means(Data *data, bool use_random_partitioning = true);
+  explicit K_Means(Data *data,
+                   const InitializationMethod initialization_method =
+                       InitializationMethod::RANDOM_SELECTION);
 
   void Run();
   void exportResults();

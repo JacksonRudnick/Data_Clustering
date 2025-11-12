@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <iostream>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -15,14 +16,30 @@
 
 // Define class variables and conduct main class code
 Data::Data(const std::string &file_path, int num_of_clusters,
-           int max_iterations, int num_of_runs, double convergence_threshold)
+           int max_iterations, int num_of_runs, double convergence_threshold,
+           const NormalizationMethod normalization_method)
     : kfile_path_(file_path),
       num_of_clusters_(num_of_clusters),
       max_iterations_(max_iterations),
       num_of_runs_(num_of_runs),
-      convergence_threshold_(convergence_threshold) {
+      convergence_threshold_(convergence_threshold),
+      knormalization_method_(normalization_method) {
   ReadPoints();
-  NormalizePoints();
+  if (knormalization_method_ == NormalizationMethod::MIN_MAX)
+    MinMaxNormalization();
+  else if (knormalization_method_ == NormalizationMethod::Z_SCORE)
+    ZScoreNormalization();
+}
+
+void Data::CheckClusters() {
+  if (!num_of_points_ || !num_of_dimensions_) {
+    std::cout << "readPoints() must be ran before selectCentroids() is called.";
+    std::exit(1);
+  }
+
+  if (!centroids_.empty()) {
+    centroids_.clear();
+  }
 }
 
 int Data::GetNumOfPoints() { return num_of_points_; }
@@ -35,13 +52,15 @@ int Data::GetMaxIterations() { return max_iterations_; }
 
 int Data::GetNumOfRuns() { return num_of_runs_; }
 
+NormalizationMethod Data::GetNormalizationMethod() {
+  return knormalization_method_;
+}
+
 std::string Data::GetFileName() {
   return kfile_path_.substr(
       kfile_path_.find_last_of("/") + 1,
       kfile_path_.find_last_of(".") - kfile_path_.find_last_of("/") - 1);
 }
-
-double Data::GetInitialSSE() { return initial_sse_; }
 
 double Data::GetConvergenceThreshold() { return convergence_threshold_; }
 
@@ -56,17 +75,19 @@ void Data::SetCentroids(std::vector<std::vector<double>> new_centroids) {
   }
 }
 
+void Data::PrintPoints() {
+  for (int i = 0; i < num_of_points_; i++) {
+    for (int j = 0; j < num_of_dimensions_; j++) {
+      std::cout << points_[i][j] << " ";
+    }
+    std::cout << std::endl;
+  }
+}
+
 // select random centroids based on how many clusters there are
 // read points must be ran before this is called
 void Data::SelectCentroids() {
-  if (!num_of_points_ || !num_of_dimensions_) {
-    std::cout << "readPoints() must be ran before selectCentroids() is called.";
-    std::exit(1);
-  }
-
-  if (!centroids_.empty()) {
-    centroids_.clear();
-  }
+  CheckClusters();
 
   std::uniform_int_distribution<> distrib(0, num_of_points_ - 1);
 
@@ -87,15 +108,8 @@ void Data::SelectCentroids() {
   }
 }
 
-void Data::SelectCentroidsAlt() {
-  if (!num_of_points_ || !num_of_dimensions_) {
-    std::cout << "readPoints() must be ran before selectCentroids() is called.";
-    std::exit(1);
-  }
-
-  if (!centroids_.empty()) {
-    centroids_.clear();
-  }
+void Data::PartitionCentroids() {
+  CheckClusters();
 
   std::uniform_int_distribution<> distrib(0, num_of_clusters_ - 1);
 
@@ -110,8 +124,64 @@ void Data::SelectCentroidsAlt() {
     CalculateCentroid(temp_clusters[i]);
     centroids_.push_back(temp_clusters[i].centroid_);
   }
+}
 
-  initial_sse_ = CalculateSSE(temp_clusters);
+void Data::MaxIMinSelection() {
+  CheckClusters();
+
+  std::uniform_int_distribution<> distrib(0, num_of_points_ - 1);
+
+  centroids_.push_back(points_[distrib(gen_)]);
+
+  // Note: should come out to be O(NDK), points, attributes, clusters
+  // In reality, I think it is closer to O(ND K^2) atm
+  /*
+  while (centroids_.size() < num_of_clusters_) {
+    int max_distance_index = 0;
+    double max_distance = 0.0;
+
+    for (int i = 0; i < num_of_points_; i++) {
+      for (int j = 0; j < centroids_.size(); j++) {
+        double dist = GetDistance(&points_[i], &centroids_[j]);
+        if (dist > max_distance) {
+          max_distance = dist;
+          max_distance_index = i;
+        }
+      }
+    }
+    centroids_.push_back(points_[max_distance_index]);
+  }
+  */
+
+  // This is actually O(NDK)
+  // keep tally of minimum distances so we can always find the best point
+  std::vector<double> min_distances(num_of_points_,
+                                    std::numeric_limits<double>::max());
+
+  for (int i = 0; i < num_of_points_; i++) {
+    min_distances[i] = GetDistance(points_[i], centroids_[0]);
+  }
+
+  while (centroids_.size() < num_of_clusters_) {
+    int index = 0;
+    double max_min_distance = std::numeric_limits<double>::min();
+
+    for (int i = 0; i < num_of_points_; i++) {
+      if (min_distances[i] > max_min_distance) {
+        index = i;
+        max_min_distance = min_distances[i];
+      }
+    }
+
+    centroids_.push_back(points_[index]);
+
+    for (int i = 0; i < num_of_points_; i++) {
+      double dist = GetDistance(points_[i], centroids_.back());
+      if (dist < min_distances[i]) {
+        min_distances[i] = dist;
+      }
+    }
+  }
 }
 
 void Data::ReadPoints() {
@@ -132,28 +202,59 @@ void Data::ReadPoints() {
       file >> points_[i][j];
     }
   }
+
+  file.close();
 }
 
-void Data::NormalizePoints() {
-  for (int j = 0; j < num_of_dimensions_; j++) {
-    double min_val = points_[0][j];
-    double max_val = points_[0][j];
+void Data::MinMaxNormalization() {
+  std::vector<double> min_vals(num_of_dimensions_,
+                               std::numeric_limits<double>::max());
+  std::vector<double> max_vals(num_of_dimensions_,
+                               std::numeric_limits<double>::lowest());
 
+  for (int j = 0; j < num_of_dimensions_; j++) {
+    min_vals[j] = points_[0][j];
+    max_vals[j] = points_[0][j];
     for (int i = 1; i < num_of_points_; i++) {
-      if (points_[i][j] < min_val) {
-        min_val = points_[i][j];
+      if (points_[i][j] < min_vals[j]) {
+        min_vals[j] = points_[i][j];
       }
-      if (points_[i][j] > max_val) {
-        max_val = points_[i][j];
+      if (points_[i][j] > max_vals[j]) {
+        max_vals[j] = points_[i][j];
       }
     }
 
-    double range = max_val - min_val;
+    double range = max_vals[j] - min_vals[j];
 
     range = std::max(range, 1e-9);  // prevent division by zero
 
     for (int i = 0; i < num_of_points_; i++) {
-      points_[i][j] = (points_[i][j] - min_val) / range;
+      points_[i][j] = (points_[i][j] - min_vals[j]) / range;
+    }
+  }
+}
+
+void Data::ZScoreNormalization() {
+  double stdev = 0.0;
+  double mean = 0.0;
+
+  for (int i = 0; i < num_of_dimensions_; i++) {
+    for (int j = 0; j < num_of_points_; j++) {
+      mean += points_[j][i];
+    }
+    mean /= num_of_points_;
+
+    double sum = 0.0;
+    for (int j = 0; j < num_of_points_; j++) {
+      double diff = points_[j][i] - mean;
+      sum += diff * diff;
+    }
+
+    stdev = sqrt(sum);
+    stdev = std::max(stdev, 1e-9);
+
+    for (int j = 0; j < num_of_points_; j++) {
+      points_[j][i] = (points_[j][i] - mean) / stdev;
     }
   }
 }

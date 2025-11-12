@@ -17,6 +17,16 @@ points themselves, each cluster starts with at least one point. There is a
 possibility that a singleton could become empty if there was another centroid at
 the same point but with the new implementation of checking for singleton
 clusters this is avoided.
+
+How does the random partition method compare against the random selection method
+in theory?
+
+In theory, random partition should make your clustering algorithm converge
+faster. With random selection, it's likely to get points all over the spread of
+data, which can make converging more difficult. With random partition, it's
+likely that with a spread of the points being randomly assigned to clusters, the
+centroids will be close to the mean of the points, which will effectively push
+centroids apart to well representative clusters.
 */
 
 #include <chrono>
@@ -68,30 +78,22 @@ std::vector<Data *> ReadDatasets() {
     file >> file_name >> num_of_clusters >> max_iterations >>
         convergence_threshold >> num_of_runs;
 
-    Data *data = new Data("datasets/" + file_name + ".txt", num_of_clusters,
-                          max_iterations, num_of_runs, convergence_threshold);
-    datasets.push_back(data);
+    for (int norm_method = 0;
+         norm_method < static_cast<int>(NormalizationMethod::COUNT);
+         norm_method++) {
+      Data *data = new Data("datasets/" + file_name + ".txt", num_of_clusters,
+                            max_iterations, num_of_runs, convergence_threshold,
+                            static_cast<NormalizationMethod>(norm_method));
+      datasets.push_back(data);
+    }
   }
+
+  file.close();
 
   return datasets;
 }
 
 int main(int argc, char *argv[]) {
-#if CLUSTER_ALL_DATA
-  if (argc > 1) {
-    std::cout << "Program is configured to cluster all datasets. "
-                 "No command line arguments needed."
-              << std::endl;
-    std::exit(1);
-  }
-#endif
-
-#if !CLUSTER_ALL_DATA
-  Data *data = ReadArgs(argc, argv);
-#else
-  std::vector<Data *> datasets = ReadDatasets();
-#endif
-
 #if OUT_TO_FILE && !CLUSTER_ALL_DATA
   std::string file_name =
       ((std::string)argv[1])
@@ -116,6 +118,21 @@ int main(int argc, char *argv[]) {
   original_cout_buf = std::cout.rdbuf(output_stream.rdbuf());
 #endif
 
+#if CLUSTER_ALL_DATA
+  if (argc > 1) {
+    std::cout << "Program is configured to cluster all datasets. "
+                 "No command line arguments needed."
+              << std::endl;
+    std::exit(1);
+  }
+#endif
+
+#if !CLUSTER_ALL_DATA
+  Data *data = ReadArgs(argc, argv);
+#else
+  std::vector<Data *> datasets = ReadDatasets();
+#endif
+
 #if !VERBOSE_OUTPUT
   std::cout << "Dataset,Normalization,Initialization,Best Initial SSE, Best "
                "Final SSE, Best # of Iterations\n";
@@ -129,12 +146,13 @@ int main(int argc, char *argv[]) {
 
 #if CLUSTER_ALL_DATA
   for (int i = 0; i < datasets.size(); i++) {
-    for (int init_method = 0; init_method < 2; init_method++) {
-      bool use_random_partitioning = (init_method == 0);
-
+    for (int init_method = 0;
+         init_method < static_cast<int>(InitializationMethod::COUNT);
+         init_method++) {
       std::cout << datasets[i]->GetFileName() << ",";
 
-      k_means = new K_Means(datasets[i], use_random_partitioning);
+      k_means = new K_Means(datasets[i],
+                            static_cast<InitializationMethod>(init_method));
       k_means->Run();
       k_means->exportResults();
 
@@ -163,6 +181,7 @@ int main(int argc, char *argv[]) {
 // fix cout buffer back to original
 #if OUT_TO_FILE
   if (original_cout_buf) {
+    output_stream.close();
     std::cout.rdbuf(original_cout_buf);
   }
 #endif

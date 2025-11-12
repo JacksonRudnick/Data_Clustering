@@ -18,32 +18,36 @@
 
 class Data {
  private:
-  std::string kfile_path_;
+  const std::string kfile_path_;
   int num_of_points_;
   int num_of_dimensions_;
   int num_of_clusters_;
   int max_iterations_;
   int num_of_runs_;
-  double initial_sse_;
   double convergence_threshold_;
+  const NormalizationMethod knormalization_method_;
   std::vector<std::vector<double>> points_;
   std::vector<std::vector<double>> centroids_;
   std::random_device rd_;
   std::mt19937 gen_{rd_()};
 
   void ReadPoints();
+  void CheckClusters();
+  void PrintPoints();
 
  public:
   Data(const std::string &file_path, int num_of_clusters, int max_iterations,
-       int num_of_runs, double convergence_threshold);
+       int num_of_runs, double convergence_threshold,
+       const NormalizationMethod normalization_method =
+           NormalizationMethod::MIN_MAX);
 
   int GetNumOfPoints();
   int GetNumOfDimensions();
   int GetNumOfClusters();
   int GetMaxIterations();
   int GetNumOfRuns();
+  NormalizationMethod GetNormalizationMethod();
   std::string GetFileName();
-  double GetInitialSSE();
   double GetConvergenceThreshold();
   std::vector<std::vector<double>> GetPoints();
   std::vector<std::vector<double>> GetCentroids();
@@ -51,9 +55,11 @@ class Data {
   void PrintData();
   void PrintCentroids();
   void SelectCentroids();     // random selection
-  void SelectCentroidsAlt();  // random partition
+  void PartitionCentroids();  // random partition
+  void MaxIMinSelection();
   void ExportCentroids();
-  void NormalizePoints();
+  void MinMaxNormalization();  // min-max normalization
+  void ZScoreNormalization();  // z-score normalization
 };
 
 #endif  // DATA_H_

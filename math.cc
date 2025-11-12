@@ -9,13 +9,12 @@
 #include <vector>
 
 // Euclidean Distance Function
-double GetDistance(std::vector<double>* p1, std::vector<double>* p2) {
-  const double* a = p1->data();
-  const double* b = p2->data();
+double GetDistance(std::vector<double>& p1, std::vector<double>& p2) {
+  const double* a = p1.data();
+  const double* b = p2.data();
 
-  int size1 = p1->size();
-
-  if (size1 != p2->size()) {
+  int size1 = p1.size();
+  if (size1 != p2.size()) {
     std::cout << "ERROR :: Points are of different dimensions." << std::endl;
     std::exit(0);
   }
@@ -52,7 +51,7 @@ double CalculateSSE(std::vector<Cluster> clusters) {
   double sse = 0.0;
   for (int i = 0; i < num_of_clusters; i++) {
     for (int j = 0; j < clusters[i].points_.size(); j++) {
-      sse += GetDistance(&clusters[i].points_[j], &clusters[i].centroid_);
+      sse += GetDistance(clusters[i].points_[j], clusters[i].centroid_);
     }
   }
 
