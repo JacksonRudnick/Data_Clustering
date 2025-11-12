@@ -204,6 +204,10 @@ void Data::ReadPoints() {
   }
 
   file.close();
+
+  if (num_of_clusters_ <= 0) {
+    num_of_clusters_ = sqrt(num_of_points_ / 2);
+  }
 }
 
 void Data::MinMaxNormalization() {

@@ -20,4 +20,7 @@ enum class InitializationMethod {
 
 enum class NormalizationMethod { MIN_MAX = 0, Z_SCORE = 1, COUNT };
 
+#define K_MIN 2
+// K_MAX is Sqrt(Number of points / 2)
+
 #endif  // CONFIG_H_
