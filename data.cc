@@ -64,21 +64,23 @@ std::string Data::GetFileName() {
 
 double Data::GetConvergenceThreshold() { return convergence_threshold_; }
 
-std::vector<std::vector<double>> Data::GetPoints() { return points_; }
+std::vector<Point> Data::GetPoints() { return points_; }
 
-std::vector<std::vector<double>> Data::GetCentroids() { return centroids_; }
+std::vector<Point> Data::GetCentroids() { return centroids_; }
 
-void Data::SetCentroids(std::vector<std::vector<double>> new_centroids) {
+void Data::SetCentroids(std::vector<Point> new_centroids) {
   centroids_.clear();
   for (int i = 0; i < num_of_clusters_; i++) {
     centroids_.push_back(new_centroids[i]);
   }
+  // Precompute squared norms for centroids
+  for (auto &c : centroids_) CalculateSquaredNorm(c);
 }
 
 void Data::PrintPoints() {
-  for (int i = 0; i < num_of_points_; i++) {
-    for (int j = 0; j < num_of_dimensions_; j++) {
-      std::cout << points_[i][j] << " ";
+  for (auto point : points_) {
+    for (auto feature : point.features_) {
+      std::cout << feature << " ";
     }
     std::cout << std::endl;
   }
@@ -195,11 +197,13 @@ void Data::ReadPoints() {
   file >> num_of_points_;
   file >> num_of_dimensions_;
 
-  points_.resize(num_of_points_, std::vector<double>(num_of_dimensions_));
-
+  // Initialize points with the correct number of dimensions before reading
+  points_.clear();
+  points_.reserve(num_of_points_);
   for (int i = 0; i < num_of_points_; i++) {
+    points_.push_back(CreateEmptyPoint(num_of_dimensions_));
     for (int j = 0; j < num_of_dimensions_; j++) {
-      file >> points_[i][j];
+      file >> points_[i].features_[j];
     }
   }
 
@@ -217,14 +221,14 @@ void Data::MinMaxNormalization() {
                                std::numeric_limits<double>::lowest());
 
   for (int j = 0; j < num_of_dimensions_; j++) {
-    min_vals[j] = points_[0][j];
-    max_vals[j] = points_[0][j];
+    min_vals[j] = points_[0].features_[j];
+    max_vals[j] = points_[0].features_[j];
     for (int i = 1; i < num_of_points_; i++) {
-      if (points_[i][j] < min_vals[j]) {
-        min_vals[j] = points_[i][j];
+      if (points_[i].features_[j] < min_vals[j]) {
+        min_vals[j] = points_[i].features_[j];
       }
-      if (points_[i][j] > max_vals[j]) {
-        max_vals[j] = points_[i][j];
+      if (points_[i].features_[j] > max_vals[j]) {
+        max_vals[j] = points_[i].features_[j];
       }
     }
 
@@ -233,7 +237,7 @@ void Data::MinMaxNormalization() {
     range = std::max(range, 1e-9);  // prevent division by zero
 
     for (int i = 0; i < num_of_points_; i++) {
-      points_[i][j] = (points_[i][j] - min_vals[j]) / range;
+      points_[i].features_[j] = (points_[i].features_[j] - min_vals[j]) / range;
     }
   }
 }
@@ -244,13 +248,13 @@ void Data::ZScoreNormalization() {
 
   for (int i = 0; i < num_of_dimensions_; i++) {
     for (int j = 0; j < num_of_points_; j++) {
-      mean[i] += points_[j][i];
+      mean[i] += points_[j].features_[i];
     }
     mean[i] /= num_of_points_;
 
     double sum = 0.0;
     for (int j = 0; j < num_of_points_; j++) {
-      double diff = points_[j][i] - mean[i];
+      double diff = points_[j].features_[i] - mean[i];
       sum += diff * diff;
     }
 
@@ -258,7 +262,7 @@ void Data::ZScoreNormalization() {
     stdev[i] = std::max(stdev[i], 1e-9);
 
     for (int j = 0; j < num_of_points_; j++) {
-      points_[j][i] = (points_[j][i] - mean[i]) / stdev[i];
+      points_[j].features_[i] = (points_[j].features_[i] - mean[i]) / stdev[i];
     }
   }
 }
@@ -266,7 +270,7 @@ void Data::ZScoreNormalization() {
 void Data::PrintData() {
   for (int i = 0; i < num_of_points_; i++) {
     for (int j = 0; j < num_of_dimensions_; j++) {
-      std::cout << points_[i][j] << " ";
+      std::cout << points_[i].features_[j] << " ";
     }
     std::cout << std::endl;
   }
@@ -275,7 +279,7 @@ void Data::PrintData() {
 void Data::PrintCentroids() {
   for (int i = 0; i < num_of_clusters_; i++) {
     for (int j = 0; j < num_of_dimensions_; j++) {
-      std::cout << centroids_[i][j] << " ";
+      std::cout << centroids_[i].features_[j] << " ";
     }
     std::cout << "\n";
   }
@@ -292,7 +296,7 @@ void Data::ExportCentroids() {
 
   for (int i = 0; i < num_of_clusters_; i++) {
     for (int j = 0; j < num_of_dimensions_; j++) {
-      output_stream << centroids_[i][j] << " ";
+      output_stream << centroids_[i].features_[j] << " ";
     }
     output_stream << "\n";
   }

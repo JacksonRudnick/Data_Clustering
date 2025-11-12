@@ -8,26 +8,26 @@
 #include <iostream>
 #include <vector>
 
-void CalculateCentroid(Cluster& cluster,
-                       const std::vector<std::vector<double>>& points) {
-  size_t num_of_dimensions = points[0].size();
+void CalculateCentroid(Cluster& cluster, const std::vector<Point>& points) {
+  size_t num_of_dimensions = points[0].features_.size();
   size_t num_of_points = cluster.point_ids_.size();
 
-  cluster.centroid_.resize(num_of_dimensions);
+  cluster.centroid_ = CreateEmptyPoint(num_of_dimensions);
 
   for (size_t i = 0; i < num_of_points; i++) {
     for (size_t j = 0; j < num_of_dimensions; j++) {
-      cluster.centroid_[j] += points[cluster.point_ids_[i]][j];
+      cluster.centroid_.features_[j] +=
+          points[cluster.point_ids_[i]].features_[j];
     }
   }
 
   for (size_t i = 0; i < num_of_dimensions; i++) {
-    cluster.centroid_[i] /= num_of_points;
+    cluster.centroid_.features_[i] /= num_of_points;
   }
 }
 
 double CalculateSSE(std::vector<Cluster> clusters,
-                    const std::vector<std::vector<double>>& points) {
+                    const std::vector<Point>& points) {
   size_t num_of_clusters = clusters.size();
 
   double sse = 0.0;
@@ -39,4 +39,12 @@ double CalculateSSE(std::vector<Cluster> clusters,
   }
 
   return sse;
+}
+
+void CalculateSquaredNorm(Point& point) {
+  double sum = 0.0;
+  for (size_t i = 0; i < point.features_.size(); i++) {
+    sum += point.features_[i] * point.features_[i];
+  }
+  point.squared_norm_ = sum;
 }

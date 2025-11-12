@@ -26,6 +26,8 @@ Repeat
 #include <vector>
 
 void K_Means::AssignPointsToClusters() {
+  for (auto& p : points_) CalculateSquaredNorm(p);
+
   // clear points from previous iteration
   for (size_t i = 0; i < clusters_.size(); i++) {
     clusters_[i].point_ids_.clear();
@@ -38,7 +40,7 @@ void K_Means::AssignPointsToClusters() {
     double lowest_distance = std::numeric_limits<double>::max();
 
     int centroid = 0;
-    std::vector<double>& curr_point = points_[i];
+    Point& curr_point = points_[i];
 
     // check distance between each point and each cluster
     for (size_t j = 0; j < num_of_clusters_; j++) {

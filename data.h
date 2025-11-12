@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "./config.h"
+#include "./point.h"
 
 class Data {
  private:
@@ -26,13 +27,14 @@ class Data {
   int num_of_runs_;
   double convergence_threshold_;
   const NormalizationMethod knormalization_method_;
-  std::vector<std::vector<double>> points_;
-  std::vector<std::vector<double>> centroids_;
+  std::vector<Point> points_;
+  std::vector<Point> centroids_;
   std::random_device rd_;
   std::mt19937 gen_{rd_()};
 
   void ReadPoints();
   void CheckClusters();
+  void CalculateSquaredNorms();
   void PrintPoints();
 
  public:
@@ -48,9 +50,9 @@ class Data {
   NormalizationMethod GetNormalizationMethod();
   std::string GetFileName();
   double GetConvergenceThreshold();
-  std::vector<std::vector<double>> GetPoints();
-  std::vector<std::vector<double>> GetCentroids();
-  void SetCentroids(std::vector<std::vector<double>> new_centroids);
+  std::vector<Point> GetPoints();
+  std::vector<Point> GetCentroids();
+  void SetCentroids(std::vector<Point> new_centroids);
   void SetNumOfClusters(int k) { num_of_clusters_ = k; }
   void PrintData();
   void PrintCentroids();

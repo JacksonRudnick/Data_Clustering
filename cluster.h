@@ -8,9 +8,11 @@
 
 #include <vector>
 
+#include "./point.h"
+
 struct Cluster {
   std::vector<size_t> point_ids_;
-  std::vector<double> centroid_;
+  Point centroid_;
   double worst_distance_;
   int pos_of_worst_point_;
 };

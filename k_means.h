@@ -16,6 +16,7 @@
 #include "./config.h"
 #include "./data.h"
 #include "./math.h"
+#include "./point.h"
 
 class K_Means {
  private:
@@ -23,7 +24,7 @@ class K_Means {
 
   int num_of_points_;
   int num_of_clusters_;
-  std::vector<std::vector<double>> points_;
+  std::vector<Point> points_;
 
   int lowest_final_sse_run_;
   double lowest_final_sse_ = std::numeric_limits<double>::max();

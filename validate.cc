@@ -6,7 +6,7 @@
 #include "./validate.h"
 
 double Validate::SilhouetteWidth() {
-  std::vector<std::vector<double>> points = data_->GetPoints();
+  std::vector<Point> points = data_->GetPoints();
   std::vector<Cluster> clusters = k_means_->GetClusters();
 
   std::vector<double> cohesion_scores;
@@ -60,6 +60,15 @@ double Validate::SilhouetteWidth() {
       }
     }
 
+    // If no other non-empty cluster was found, define separation as 0.0 for
+    // every point in this cluster to avoid accessing clusters[c2] out of
+    // bounds.
+    if (cluster_min_dist_id == clusters.size()) {
+      for (size_t j = 0; j < cluster1_size; ++j)
+        separation_scores.push_back(0.0);
+      continue;
+    }
+
     size_t c2 = cluster_min_dist_id;
     size_t cluster2_size = clusters[c2].point_ids_.size();
 
@@ -99,15 +108,15 @@ double Validate::CalinskiHarabasz() {
   // data centroid (mean)
 
   // get overall data centroid
-  std::vector<std::vector<double>> points = data_->GetPoints();
-  std::vector<double> overall_centroid(points[0].size(), 0.0);
+  std::vector<Point> points = data_->GetPoints();
+  Point overall_centroid = CreateEmptyPoint(points[0].features_.size());
   for (size_t i = 0; i < points.size(); i++) {
-    for (size_t j = 0; j < points[0].size(); j++) {
-      overall_centroid[j] += points[i][j];
+    for (size_t j = 0; j < points[0].features_.size(); j++) {
+      overall_centroid.features_[j] += points[i].features_[j];
     }
   }
-  for (size_t j = 0; j < points[0].size(); j++) {
-    overall_centroid[j] /= static_cast<double>(points.size());
+  for (size_t j = 0; j < points[0].features_.size(); j++) {
+    overall_centroid.features_[j] /= static_cast<double>(points.size());
   }
 
   // calculate BCSS
