@@ -44,10 +44,12 @@ class K_Means {
  public:
   explicit K_Means(Data *data,
                    const InitializationMethod initialization_method =
-                       InitializationMethod::RANDOM_SELECTION);
+                       InitializationMethod::RANDOM_PARTITION);
 
   void Run();
   void exportResults();
+
+  std::vector<Cluster> GetClusters() { return clusters_; };
 };
 
 #endif  // K_MEANS_H_

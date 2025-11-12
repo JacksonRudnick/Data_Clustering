@@ -11,8 +11,28 @@
 
 #include "./cluster.h"
 
-double GetDistance(std::vector<double>& p1, std::vector<double>& p2);
+inline double GetDistance(const std::vector<double>& p1,
+                          const std::vector<double>& p2) {
+  size_t size1 = p1.size();
+  if (size1 != p2.size()) {
+    std::cerr << "ERROR :: Points are of different dimensions." << std::endl;
+    std::exit(EXIT_FAILURE);
+  }
+
+  const double* a = p1.data();
+  const double* b = p2.data();
+
+  double distance = 0;
+  for (size_t i = 0; i < size1; i++) {
+    const double diff = a[i] - b[i];
+    distance += diff * diff;
+  }
+
+  return distance;
+}
+
 void CalculateCentroid(Cluster& cluster);
+
 double CalculateSSE(std::vector<Cluster> clusters);
 
 #endif  // MATH_H_

@@ -27,21 +27,21 @@ Repeat
 
 void K_Means::AssignPointsToClusters() {
   // clear points from previous iteration
-  for (int i = 0; i < clusters_.size(); i++) {
+  for (size_t i = 0; i < clusters_.size(); i++) {
     clusters_[i].points_.clear();
     clusters_[i].worst_distance_ = 0.0;
     clusters_[i].pos_of_worst_point_ = -1;
   }
 
   // assign points to clusters O(n*k*d)
-  for (int i = 0; i < num_of_points_; i++) {
+  for (size_t i = 0; i < num_of_points_; i++) {
     double lowest_distance = std::numeric_limits<double>::max();
 
     int centroid = 0;
     std::vector<double>& curr_point = points_[i];
 
     // check distance between each point and each cluster
-    for (int j = 0; j < num_of_clusters_; j++) {
+    for (size_t j = 0; j < num_of_clusters_; j++) {
       double new_distance = GetDistance(curr_point, clusters_[j].centroid_);
       if (new_distance < lowest_distance) {
         lowest_distance = new_distance;

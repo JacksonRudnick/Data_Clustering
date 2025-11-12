@@ -36,10 +36,9 @@ class Data {
   void PrintPoints();
 
  public:
-  Data(const std::string &file_path, int num_of_clusters, int max_iterations,
-       int num_of_runs, double convergence_threshold,
-       const NormalizationMethod normalization_method =
-           NormalizationMethod::MIN_MAX);
+  Data(std::string file_path, int num_of_clusters = 0, int max_iterations = 100,
+       int num_of_runs = 100, double convergence_threshold = 0.001,
+       NormalizationMethod normalization_method = NormalizationMethod::MIN_MAX);
 
   int GetNumOfPoints();
   int GetNumOfDimensions();
@@ -52,6 +51,7 @@ class Data {
   std::vector<std::vector<double>> GetPoints();
   std::vector<std::vector<double>> GetCentroids();
   void SetCentroids(std::vector<std::vector<double>> new_centroids);
+  void SetNumOfClusters(int k) { num_of_clusters_ = k; }
   void PrintData();
   void PrintCentroids();
   void SelectCentroids();     // random selection

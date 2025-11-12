@@ -15,9 +15,9 @@
 #include "./math.h"
 
 // Define class variables and conduct main class code
-Data::Data(const std::string &file_path, int num_of_clusters,
-           int max_iterations, int num_of_runs, double convergence_threshold,
-           const NormalizationMethod normalization_method)
+Data::Data(std::string file_path, int num_of_clusters, int max_iterations,
+           int num_of_runs, double convergence_threshold,
+           NormalizationMethod normalization_method)
     : kfile_path_(file_path),
       num_of_clusters_(num_of_clusters),
       max_iterations_(max_iterations),
@@ -239,26 +239,26 @@ void Data::MinMaxNormalization() {
 }
 
 void Data::ZScoreNormalization() {
-  double stdev = 0.0;
-  double mean = 0.0;
+  std::vector<double> stdev(num_of_dimensions_, 0.0);
+  std::vector<double> mean(num_of_dimensions_, 0.0);
 
   for (int i = 0; i < num_of_dimensions_; i++) {
     for (int j = 0; j < num_of_points_; j++) {
-      mean += points_[j][i];
+      mean[i] += points_[j][i];
     }
-    mean /= num_of_points_;
+    mean[i] /= num_of_points_;
 
     double sum = 0.0;
     for (int j = 0; j < num_of_points_; j++) {
-      double diff = points_[j][i] - mean;
+      double diff = points_[j][i] - mean[i];
       sum += diff * diff;
     }
 
-    stdev = sqrt(sum);
-    stdev = std::max(stdev, 1e-9);
+    stdev[i] = sqrt(sum);
+    stdev[i] = std::max(stdev[i], 1e-9);
 
     for (int j = 0; j < num_of_points_; j++) {
-      points_[j][i] = (points_[j][i] - mean) / stdev;
+      points_[j][i] = (points_[j][i] - mean[i]) / stdev[i];
     }
   }
 }
