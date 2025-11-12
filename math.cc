@@ -8,15 +8,16 @@
 #include <iostream>
 #include <vector>
 
-void CalculateCentroid(Cluster& cluster) {
-  size_t num_of_dimensions = cluster.points_[0].size();
-  size_t num_of_points = cluster.points_.size();
+void CalculateCentroid(Cluster& cluster,
+                       const std::vector<std::vector<double>>& points) {
+  size_t num_of_dimensions = points[0].size();
+  size_t num_of_points = cluster.point_ids_.size();
 
   cluster.centroid_.resize(num_of_dimensions);
 
   for (size_t i = 0; i < num_of_points; i++) {
     for (size_t j = 0; j < num_of_dimensions; j++) {
-      cluster.centroid_[j] += cluster.points_[i][j];
+      cluster.centroid_[j] += points[cluster.point_ids_[i]][j];
     }
   }
 
@@ -25,13 +26,15 @@ void CalculateCentroid(Cluster& cluster) {
   }
 }
 
-double CalculateSSE(std::vector<Cluster> clusters) {
+double CalculateSSE(std::vector<Cluster> clusters,
+                    const std::vector<std::vector<double>>& points) {
   size_t num_of_clusters = clusters.size();
 
   double sse = 0.0;
   for (size_t i = 0; i < num_of_clusters; i++) {
-    for (size_t j = 0; j < clusters[i].points_.size(); j++) {
-      sse += GetDistance(clusters[i].points_[j], clusters[i].centroid_);
+    for (size_t j = 0; j < clusters[i].point_ids_.size(); j++) {
+      sse +=
+          GetDistance(points[clusters[i].point_ids_[j]], clusters[i].centroid_);
     }
   }
 

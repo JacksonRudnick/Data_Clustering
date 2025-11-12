@@ -9,7 +9,7 @@
 #include <vector>
 
 struct Cluster {
-  std::vector<std::vector<double>> points_;
+  std::vector<size_t> point_ids_;
   std::vector<double> centroid_;
   double worst_distance_;
   int pos_of_worst_point_;

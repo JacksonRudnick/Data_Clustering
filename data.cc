@@ -117,11 +117,11 @@ void Data::PartitionCentroids() {
 
   for (int i = 0; i < num_of_points_; i++) {
     int cluster_index = distrib(gen_);
-    temp_clusters[cluster_index].points_.push_back(points_[i]);
+    temp_clusters[cluster_index].point_ids_.push_back(i);
   }
 
   for (int i = 0; i < num_of_clusters_; i++) {
-    CalculateCentroid(temp_clusters[i]);
+    CalculateCentroid(temp_clusters[i], points_);
     centroids_.push_back(temp_clusters[i].centroid_);
   }
 }

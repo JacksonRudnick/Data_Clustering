@@ -31,8 +31,10 @@ inline double GetDistance(const std::vector<double>& p1,
   return distance;
 }
 
-void CalculateCentroid(Cluster& cluster);
+void CalculateCentroid(Cluster& cluster,
+                       const std::vector<std::vector<double>>& points);
 
-double CalculateSSE(std::vector<Cluster> clusters);
+double CalculateSSE(std::vector<Cluster> clusters,
+                    const std::vector<std::vector<double>>& points);
 
 #endif  // MATH_H_

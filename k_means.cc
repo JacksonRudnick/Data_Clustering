@@ -28,7 +28,7 @@ Repeat
 void K_Means::AssignPointsToClusters() {
   // clear points from previous iteration
   for (size_t i = 0; i < clusters_.size(); i++) {
-    clusters_[i].points_.clear();
+    clusters_[i].point_ids_.clear();
     clusters_[i].worst_distance_ = 0.0;
     clusters_[i].pos_of_worst_point_ = -1;
   }
@@ -48,38 +48,38 @@ void K_Means::AssignPointsToClusters() {
         centroid = j;
       }
     }
-    clusters_[centroid].points_.push_back(curr_point);
+    clusters_[centroid].point_ids_.push_back(i);
 
     // update worst distance of a cluster
     if (lowest_distance > clusters_[centroid].worst_distance_) {
       clusters_[centroid].worst_distance_ = lowest_distance;
       clusters_[centroid].pos_of_worst_point_ =
-          clusters_[centroid].points_.size() - 1;
+          clusters_[centroid].point_ids_.size() - 1;
     }
   }
 }
 
 void K_Means::UpdateCentroids() {
   for (int i = 0; i < clusters_.size(); i++) {
-    if (clusters_[i].points_.empty()) {
+    if (clusters_[i].point_ids_.empty()) {
       // skip empty clusters
       continue;
     }
 
-    CalculateCentroid(clusters_[i]);
+    CalculateCentroid(clusters_[i], points_);
   }
 }
 
 void K_Means::CheckForSingletonClusters() {
   for (int i = 0; i < num_of_clusters_; i++) {
-    if (clusters_[i].points_.size() <= 1) {
+    if (clusters_[i].point_ids_.size() <= 1) {
       // store to reduce multiple memory accesses
       double worst_distance = 0;
       int pos_of_worst_point = -1;
       int cluster_with_worst_point = -1;
 
       for (int j = 0; j < num_of_clusters_; j++) {
-        if (clusters_[j].points_.size() > 1 &&
+        if (clusters_[j].point_ids_.size() > 1 &&
             clusters_[j].worst_distance_ > worst_distance) {
           worst_distance = clusters_[j].worst_distance_;
           pos_of_worst_point = clusters_[j].pos_of_worst_point_;
@@ -89,13 +89,14 @@ void K_Means::CheckForSingletonClusters() {
 
       // update singleton cluster
       if (pos_of_worst_point != -1) {
-        clusters_[i].points_.push_back(
-            clusters_[cluster_with_worst_point].points_[pos_of_worst_point]);
-        clusters_[i].centroid_ = clusters_[i].points_[0];
+        clusters_[i].point_ids_.push_back(
+            clusters_[cluster_with_worst_point].point_ids_[pos_of_worst_point]);
+        clusters_[i].centroid_ =
+            points_[clusters_[i].point_ids_[0]];  // only point in the cluster
 
         // Safely remove from source cluster
-        clusters_[cluster_with_worst_point].points_.erase(
-            clusters_[cluster_with_worst_point].points_.begin() +
+        clusters_[cluster_with_worst_point].point_ids_.erase(
+            clusters_[cluster_with_worst_point].point_ids_.begin() +
             pos_of_worst_point);
 
         // Update worst distance tracking for the source cluster
@@ -110,9 +111,10 @@ void K_Means::UpdateWorstDistance(int cluster_index) {
   clusters_[cluster_index].pos_of_worst_point_ = -1;
 
   // check all of the points in the cluster to find the new worst distance
-  for (int i = 0; i < clusters_[cluster_index].points_.size(); i++) {
-    double distance = GetDistance(clusters_[cluster_index].points_[i],
-                                  clusters_[cluster_index].centroid_);
+  for (int i = 0; i < clusters_[cluster_index].point_ids_.size(); i++) {
+    double distance =
+        GetDistance(points_[clusters_[cluster_index].point_ids_[i]],
+                    clusters_[cluster_index].centroid_);
     if (distance > clusters_[cluster_index].worst_distance_) {
       clusters_[cluster_index].worst_distance_ = distance;
       clusters_[cluster_index].pos_of_worst_point_ = i;
@@ -175,7 +177,7 @@ void K_Means::Run() {
       iter_start = std::chrono::high_resolution_clock::now();
 #endif
 
-      double sse = CalculateSSE(clusters_);
+      double sse = CalculateSSE(clusters_, points_);
 
       if (iter == 0) {
         if (sse < best_initial_sse_) {

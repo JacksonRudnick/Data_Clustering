@@ -19,7 +19,7 @@ double Validate::SilhouetteWidth() {
   cohesion_scores.reserve(points.size());
 
   for (size_t i = 0; i < clusters.size(); i++) {
-    size_t cluster_size = clusters[i].points_.size();
+    size_t cluster_size = clusters[i].point_ids_.size();
     if (cluster_size == 0) continue;
 
     for (size_t j = 0; j < cluster_size; ++j) {
@@ -31,7 +31,8 @@ double Validate::SilhouetteWidth() {
       double sum = 0.0;
       for (size_t k = 0; k < cluster_size; k++) {
         if (j == k) continue;
-        sum += GetDistance(clusters[i].points_[j], clusters[i].points_[k]);
+        sum += GetDistance(points[clusters[i].point_ids_[j]],
+                           points[clusters[i].point_ids_[k]]);
       }
       cohesion_scores.push_back(sum / static_cast<double>(cluster_size - 1));
     }
@@ -42,7 +43,7 @@ double Validate::SilhouetteWidth() {
   separation_scores.reserve(points.size());
 
   for (size_t i = 0; i < clusters.size(); i++) {
-    size_t cluster1_size = clusters[i].points_.size();
+    size_t cluster1_size = clusters[i].point_ids_.size();
     if (cluster1_size == 0) continue;
 
     double cluster_min_dist = std::numeric_limits<double>::max();
@@ -50,7 +51,7 @@ double Validate::SilhouetteWidth() {
 
     for (size_t j = 0; j < clusters.size(); j++) {
       if (i == j) continue;
-      if (clusters[j].points_.empty()) continue;  // skip empty clusters
+      if (clusters[j].point_ids_.empty()) continue;  // skip empty clusters
 
       double dist = GetDistance(clusters[i].centroid_, clusters[j].centroid_);
       if (dist < cluster_min_dist) {
@@ -60,12 +61,13 @@ double Validate::SilhouetteWidth() {
     }
 
     size_t c2 = cluster_min_dist_id;
-    size_t cluster2_size = clusters[c2].points_.size();
+    size_t cluster2_size = clusters[c2].point_ids_.size();
 
     for (size_t j = 0; j < cluster1_size; j++) {
       double sum = 0.0;
       for (size_t k = 0; k < cluster2_size; k++) {
-        sum += GetDistance(clusters[i].points_[j], clusters[c2].points_[k]);
+        sum += GetDistance(points[clusters[i].point_ids_[j]],
+                           points[clusters[c2].point_ids_[k]]);
       }
       // Average separation per point
       separation_scores.push_back(sum / static_cast<double>(cluster2_size));
@@ -112,7 +114,7 @@ double Validate::CalinskiHarabasz() {
   std::vector<Cluster> clusters = k_means_->GetClusters();
   double bcss = 0.0;
   for (size_t i = 0; i < clusters.size(); i++) {
-    size_t cluster_size = clusters[i].points_.size();
+    size_t cluster_size = clusters[i].point_ids_.size();
     if (cluster_size == 0) continue;
     double dist = GetDistance(clusters[i].centroid_, overall_centroid);
     bcss += static_cast<double>(cluster_size) * dist;
@@ -122,11 +124,12 @@ double Validate::CalinskiHarabasz() {
   // distances between the data points and their respective cluster centroids
   double wcss = 0.0;
   for (size_t i = 0; i < clusters.size(); i++) {
-    size_t cluster_size = clusters[i].points_.size();
+    size_t cluster_size = clusters[i].point_ids_.size();
     if (cluster_size == 0) continue;
 
     for (size_t j = 0; j < cluster_size; j++) {
-      double dist = GetDistance(clusters[i].points_[j], clusters[i].centroid_);
+      double dist =
+          GetDistance(points[clusters[i].point_ids_[j]], clusters[i].centroid_);
       wcss += dist * dist;
     }
   }
