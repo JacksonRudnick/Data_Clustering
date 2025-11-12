@@ -11,4 +11,7 @@
 #define VERBOSE_OUTPUT 0
 #define CHECK_PERFORMANCE 0
 
+#define K_MIN 2
+// K_MAX is Sqrt(Number of points / 2)
+
 #endif  // CONFIG_H_
