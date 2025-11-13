@@ -7,7 +7,7 @@
 
 double Validate::SilhouetteWidth() {
   std::vector<std::vector<double>> points = data_->GetPoints();
-  std::vector<Cluster> clusters = k_means_->GetClusters();
+  std::vector<Cluster> clusters = k_means_->GetBestClusters();
 
   std::vector<double> cohesion_scores;
   std::vector<double> separation_scores;
@@ -127,7 +127,7 @@ double Validate::CalinskiHarabasz() {
 
     for (size_t j = 0; j < cluster_size; j++) {
       double dist = GetDistance(clusters[i].points_[j], clusters[i].centroid_);
-      wcss += dist * dist;
+      wcss += dist;
     }
   }
 
@@ -135,6 +135,18 @@ double Validate::CalinskiHarabasz() {
                  (wcss * (points.size() - clusters.size()));
 
   return index;
+}
+
+void Validate::PrintScores(size_t k, double score) {
+  std::cout << data_->GetFileName() << ",";
+
+  if (method_ == ValidationMethod::SILHOUETTE_WIDTH) {
+    std::cout << "Silhouette Width,";
+  } else if (method_ == ValidationMethod::CALINSKI_HARABASZ) {
+    std::cout << "Calinski Harabasz,";
+  }
+
+  std::cout << k << "," << score << std::endl;
 }
 
 void Validate::RunValidation() {
@@ -148,7 +160,7 @@ void Validate::RunValidation() {
 
         double score = SilhouetteWidth();
 
-        std::cout << "K: " << k << ", Silhouette Width: " << score << std::endl;
+        PrintScores(k, score);
       }
       break;
     }
@@ -161,8 +173,7 @@ void Validate::RunValidation() {
 
         double score = CalinskiHarabasz();
 
-        std::cout << "K: " << k << ", Calinski-Harabasz Index: " << score
-                  << std::endl;
+        PrintScores(k, score);
       }
       break;
     }

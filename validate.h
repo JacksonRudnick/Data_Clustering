@@ -22,6 +22,7 @@ class Validate {
 
   double SilhouetteWidth();
   double CalinskiHarabasz();
+  void PrintScores(size_t k, double score);
 
  public:
   Validate(Data* data, ValidationMethod method);

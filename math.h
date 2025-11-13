@@ -31,8 +31,16 @@ inline double GetDistance(const std::vector<double>& p1,
   return distance;
 }
 
+inline double GetDistanceSquaredNorms(double squared_norm_p1,
+                                      double squared_norm_p2,
+                                      double dot_product) {
+  return squared_norm_p1 + squared_norm_p2 - 2 * dot_product;
+}
+
 void CalculateCentroid(Cluster& cluster);
 
 double CalculateSSE(std::vector<Cluster> clusters);
+
+double CalculateSquaredNorm(const std::vector<double>& point);
 
 #endif  // MATH_H_

@@ -37,3 +37,11 @@ double CalculateSSE(std::vector<Cluster> clusters) {
 
   return sse;
 }
+
+double CalculateSquaredNorm(const std::vector<double>& point) {
+  double squared_norm = 0.0;
+  for (size_t i = 0; i < point.size(); i++) {
+    squared_norm += point[i] * point[i];
+  }
+  return squared_norm;
+}

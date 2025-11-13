@@ -33,6 +33,17 @@ void K_Means::AssignPointsToClusters() {
     clusters_[i].pos_of_worst_point_ = -1;
   }
 
+  squared_norms_points_.clear();
+  for (size_t i = 0; i < points_.size(); i++) {
+    squared_norms_points_.push_back(CalculateSquaredNorm(points_[i]));
+  }
+
+  squared_norms_centroids_.clear();
+  for (size_t i = 0; i < clusters_.size(); i++) {
+    squared_norms_centroids_.push_back(
+        CalculateSquaredNorm(clusters_[i].centroid_));
+  }
+
   // assign points to clusters O(n*k*d)
   for (size_t i = 0; i < num_of_points_; i++) {
     double lowest_distance = std::numeric_limits<double>::max();
@@ -42,7 +53,10 @@ void K_Means::AssignPointsToClusters() {
 
     // check distance between each point and each cluster
     for (size_t j = 0; j < num_of_clusters_; j++) {
-      double new_distance = GetDistance(curr_point, clusters_[j].centroid_);
+      double new_distance = GetDistanceSquaredNorms(
+          squared_norms_points_[i], squared_norms_centroids_[j],
+          std::inner_product(curr_point.begin(), curr_point.end(),
+                             clusters_[j].centroid_.begin(), 0.0));
       if (new_distance < lowest_distance) {
         lowest_distance = new_distance;
         centroid = j;
@@ -238,6 +252,7 @@ void K_Means::Run() {
     if (sse_ < lowest_final_sse_) {
       lowest_final_sse_ = sse_;
       lowest_final_sse_run_ = i + 1;
+      best_clusters_ = clusters_;
     }
   }
 

@@ -34,6 +34,8 @@ class Data {
   void ReadPoints();
   void CheckClusters();
   void PrintPoints();
+  void CalculateSquaredNormsPoints();
+  void CalculateSquaredNormsCentroids();
 
  public:
   Data(std::string file_path, int num_of_clusters = 0, int max_iterations = 100,
