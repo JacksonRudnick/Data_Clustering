@@ -6,6 +6,7 @@
 #ifndef UTIL_H_
 #define UTIL_H_
 
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <string>
@@ -17,7 +18,7 @@
 std::vector<Data*> ReadDatasets() {
   std::vector<Data*> datasets;
 
-  std::ifstream file("datasets/attributes.txt");
+  std::ifstream file("../datasets/attributes.txt");
   if (!file.is_open()) {
     std::cout << "File failed to open. PATH :: datasets/attributes.txt"
               << std::endl;
@@ -42,12 +43,31 @@ std::vector<Data*> ReadDatasets() {
       datasets.push_back(data);
     }*/
 
-    Data* data = new Data("datasets/" + file_name + ".txt", 0, 100, 100, 0.001,
-                          NormalizationMethod::MIN_MAX);
+    Data* data = new Data("../datasets/" + file_name + ".txt", 0, 100, 100,
+                          0.001, NormalizationMethod::MIN_MAX);
     datasets.push_back(data);
   }
 
   file.close();
+
+  return datasets;
+}
+
+std::vector<Data*> ReadLabeledDatasets() {
+  std::vector<Data*> datasets;
+
+  std::string directory = "../datasets_external_val/";
+  if (!std::filesystem::exists(directory)) {
+    std::cout << "Directory does not exist: " << directory << std::endl;
+    std::exit(1);
+  }
+
+  for (const auto& entry : std::filesystem::directory_iterator(directory)) {
+    if (entry.path().extension() == ".txt") {
+      Data* data = new Data(entry.path().string());
+      datasets.push_back(data);
+    }
+  }
 
   return datasets;
 }

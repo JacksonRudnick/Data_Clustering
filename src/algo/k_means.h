@@ -14,6 +14,7 @@
 
 #include "../data/cluster.h"
 #include "../data/data.h"
+#include "../external_validation/external_val.h"
 #include "../util/config.h"
 #include "../util/math.h"
 
@@ -37,7 +38,13 @@ class K_Means {
   std::vector<Cluster> best_clusters_;
   std::vector<double> squared_norms_centroids_;
 
+  std::vector<int> labels_;
+  std::vector<int> true_labels_;
+  double highest_rand_index_ = std::numeric_limits<double>::min();
+  double highest_jaccard_index_ = std::numeric_limits<double>::min();
+
   Data *data_;
+  ExternalValidation *external_validation_ = new ExternalValidation();
 
   void AssignPointsToClusters();
   void UpdateCentroids();
@@ -55,6 +62,9 @@ class K_Means {
 
   std::vector<Cluster> GetClusters() { return clusters_; };
   std::vector<Cluster> GetBestClusters() { return best_clusters_; };
+  std::vector<int> GetLabels() { return labels_; };
+  double GetRandIndex() { return highest_rand_index_; };
+  double GetJaccardIndex() { return highest_jaccard_index_; };
 };
 
 #endif  // K_MEANS_H_

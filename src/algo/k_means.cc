@@ -63,6 +63,7 @@ void K_Means::AssignPointsToClusters() {
       }
     }
     clusters_[centroid].points_.push_back(curr_point);
+    labels_[i] = centroid;
 
     // update worst distance of a cluster
     if (lowest_distance > clusters_[centroid].worst_distance_) {
@@ -140,6 +141,8 @@ K_Means::K_Means(Data* data, const InitializationMethod initialization_method)
   num_of_points_ = data->GetNumOfPoints();
   num_of_clusters_ = data->GetNumOfClusters();
   points_ = data->GetPoints();
+  true_labels_ = data->GetTrueLabels();
+  labels_.resize(num_of_points_, -1);
 }
 
 void K_Means::InitializeClusters() {
@@ -246,6 +249,19 @@ void K_Means::Run() {
       std::cout << "Updating centroids took: " << iter_duration.count()
                 << " milliseconds" << std::endl;
 #endif
+    }
+
+    // run external validation metrics
+    double rand_index = external_validation_->RandIndex(true_labels_, labels_);
+    double jaccard_index =
+        external_validation_->JaccardIndex(true_labels_, labels_);
+
+    if (rand_index > highest_rand_index_) {
+      highest_rand_index_ = rand_index;
+    }
+
+    if (jaccard_index > highest_jaccard_index_) {
+      highest_jaccard_index_ = jaccard_index;
     }
 
     // keep track of best run

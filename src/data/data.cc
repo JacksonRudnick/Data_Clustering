@@ -194,13 +194,17 @@ void Data::ReadPoints() {
   // first two entries in file are points and dimensions
   file >> num_of_points_;
   file >> num_of_dimensions_;
+  if (num_of_clusters_ == 0) file >> num_of_clusters_;
 
-  points_.resize(num_of_points_, std::vector<double>(num_of_dimensions_));
+  points_.resize(num_of_points_, std::vector<double>(num_of_dimensions_ - 1));
 
   for (int i = 0; i < num_of_points_; i++) {
-    for (int j = 0; j < num_of_dimensions_; j++) {
+    for (int j = 0; j < num_of_dimensions_ - 1; j++) {
       file >> points_[i][j];
     }
+    int label;
+    file >> label;
+    true_labels_.push_back(label);
   }
 
   file.close();

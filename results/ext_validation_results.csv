@@ -1,0 +1,11 @@
+Dataset,Rand Index,Jaccard Index
+iris_bezdek,0.885906,0.71003
+ruspini,1,1
+landsat,0.857355,0.449502
+ionosphere,0.58893,0.538462
+letter_recognition,0.934534,0.0999712
+yeast,0.754546,0.208779
+optdigits,0.95641,0.644375
+mfeat-fou,0.904405,0.362641
+wine,0.962039,0.892947
+ecoli,0.903003,0.681876

@@ -30,6 +30,7 @@ class Data {
   std::vector<std::vector<double>> centroids_;
   std::random_device rd_;
   std::mt19937 gen_{rd_()};
+  std::vector<int> true_labels_;
 
   void ReadPoints();
   void CheckClusters();
@@ -62,6 +63,8 @@ class Data {
   void ExportCentroids();
   void MinMaxNormalization();  // min-max normalization
   void ZScoreNormalization();  // z-score normalization
+
+  std::vector<int> GetTrueLabels() { return true_labels_; }
 };
 
 #endif  // DATA_H_

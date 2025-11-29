@@ -6,14 +6,18 @@
 #ifndef EXTERNAL_VAL_H_
 #define EXTERNAL_VAL_H_
 
-#include "../data/cluster.h"
+#include <vector>
 
 class ExternalValidation {
  private:
  public:
   ExternalValidation();
 
-  double RandIndex(Cluster true_labels, Cluster predicted_labels);
+  double RandIndex(const std::vector<int>& true_labels,
+                   const std::vector<int>& predicted_labels);
+
+  double JaccardIndex(const std::vector<int>& true_labels,
+                      const std::vector<int>& predicted_labels);
 };
 
 #endif  // EXTERNAL_VAL_H_
