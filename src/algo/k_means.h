@@ -12,10 +12,10 @@
 #include <thread>
 #include <vector>
 
-#include "./cluster.h"
-#include "./config.h"
-#include "./data.h"
-#include "./math.h"
+#include "../data/cluster.h"
+#include "../data/data.h"
+#include "../util/config.h"
+#include "../util/math.h"
 
 class K_Means {
  private:

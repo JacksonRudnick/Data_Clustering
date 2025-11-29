@@ -11,8 +11,8 @@
 #include <string>
 #include <vector>
 
+#include "../util/math.h"
 #include "./cluster.h"
-#include "./math.h"
 
 // Define class variables and conduct main class code
 Data::Data(std::string file_path, int num_of_clusters, int max_iterations,

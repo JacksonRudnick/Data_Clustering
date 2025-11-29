@@ -11,8 +11,8 @@
 #include <string>
 #include <vector>
 
+#include "../data/data.h"
 #include "./config.h"
-#include "./data.h"
 
 std::vector<Data*> ReadDatasets() {
   std::vector<Data*> datasets;

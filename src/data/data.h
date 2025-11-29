@@ -14,7 +14,7 @@
 #include <string>
 #include <vector>
 
-#include "./config.h"
+#include "../util/config.h"
 
 class Data {
  private:

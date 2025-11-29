@@ -6,7 +6,7 @@
 #ifndef EXTERNAL_VAL_H_
 #define EXTERNAL_VAL_H_
 
-#include "./cluster.h"
+#include "../data/cluster.h"
 
 class ExternalValidation {
  private:

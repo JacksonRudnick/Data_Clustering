@@ -6,10 +6,10 @@
 #ifndef VALIDATE_H_
 #define VALIDATE_H_
 
-#include "./config.h"
-#include "./data.h"
-#include "./k_means.h"
-#include "./math.h"
+#include "../algo/k_means.h"
+#include "../data/data.h"
+#include "../util/config.h"
+#include "../util/math.h"
 
 class Validate {
  private:

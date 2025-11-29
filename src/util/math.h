@@ -9,7 +9,7 @@
 #include <iostream>
 #include <vector>
 
-#include "./cluster.h"
+#include "../data/cluster.h"
 
 inline double GetDistance(const std::vector<double>& p1,
                           const std::vector<double>& p2) {

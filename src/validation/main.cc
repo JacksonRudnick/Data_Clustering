@@ -6,10 +6,10 @@
 #include <filesystem>
 #include <fstream>
 
-#include "./config.h"
-#include "./data.h"
-#include "./k_means.h"
-#include "./util.h"
+#include "../algo/k_means.h"
+#include "../data/data.h"
+#include "../util/config.h"
+#include "../util/util.h"
 #include "./validate.h"
 
 int main() {

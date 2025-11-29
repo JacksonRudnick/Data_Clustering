@@ -37,9 +37,9 @@ centroids apart to well representative clusters.
 #include <string>
 #include <vector>
 
-#include "./config.h"
-#include "./data.h"
-#include "./k_means.h"
+#include "./algo/k_means.h"
+#include "./data/data.h"
+#include "./util/config.h"
 
 Data *ReadArgs(int argc, char *argv[]) {
   if (argc != 6) {
