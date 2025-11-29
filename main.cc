@@ -31,19 +31,16 @@ int main() {
             << std::endl;
 
   std::vector<Data*> data = ReadDatasets();
+
   K_Means* k_means;
   Validate* validate;
 
   for (size_t i = 0; i < data.size(); i++) {
-    for (size_t val_method = 0;
-         val_method < static_cast<int>(ValidationMethod::COUNT); val_method++) {
-      k_means = new K_Means(data[i]);
-      validate =
-          new Validate(data[i], static_cast<ValidationMethod>(val_method));
+    k_means = new K_Means(data[i]);
+    validate = new Validate(data[i]);
 
-      // Run validation
-      validate->RunValidation();
-    }
+    // Run validation
+    validate->RunValidation();
   }
 
   // Restore original cout buffer

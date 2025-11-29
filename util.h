@@ -37,7 +37,7 @@ std::vector<Data*> ReadDatasets() {
       datasets.push_back(data);
     }*/
 
-    Data* data = new Data("datasets/" + file_name + ".txt", 0, 100, 10, 0.001,
+    Data* data = new Data("datasets/" + file_name + ".txt", 0, 100, 100, 0.001,
                           NormalizationMethod::MIN_MAX);
     datasets.push_back(data);
   }

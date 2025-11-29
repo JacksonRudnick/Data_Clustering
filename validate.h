@@ -25,7 +25,7 @@ class Validate {
   void PrintScores(size_t k, double score);
 
  public:
-  Validate(Data* data, ValidationMethod method);
+  Validate(Data* data);
 
   void RunValidation();
 };

@@ -150,40 +150,27 @@ void Validate::PrintScores(size_t k, double score) {
 }
 
 void Validate::RunValidation() {
-  switch (method_) {
-    case ValidationMethod::SILHOUETTE_WIDTH: {
-      for (size_t k = min_clusters; k <= max_clusters; k++) {
-        data_->SetNumOfClusters(static_cast<int>(k));
+  min_clusters = 65;
 
-        k_means_ = new K_Means(data_);
-        k_means_->Run();
+  for (size_t k = min_clusters; k <= max_clusters; k++) {
+    data_->SetNumOfClusters(static_cast<int>(k));
 
-        double score = SilhouetteWidth();
+    k_means_ = new K_Means(data_);
+    k_means_->Run();
 
-        PrintScores(k, score);
-      }
-      break;
-    }
-    case ValidationMethod::CALINSKI_HARABASZ: {
-      for (size_t k = min_clusters; k <= max_clusters; k++) {
-        data_->SetNumOfClusters(static_cast<int>(k));
+    double score = SilhouetteWidth();
 
-        k_means_ = new K_Means(data_);
-        k_means_->Run();
+    method_ = ValidationMethod::SILHOUETTE_WIDTH;
+    PrintScores(k, score);
 
-        double score = CalinskiHarabasz();
+    score = CalinskiHarabasz();
 
-        PrintScores(k, score);
-      }
-      break;
-    }
-    default:
-      break;
+    method_ = ValidationMethod::CALINSKI_HARABASZ;
+    PrintScores(k, score);
   }
 }
 
-Validate::Validate(Data* data, ValidationMethod method)
-    : data_(data), method_(method) {
+Validate::Validate(Data* data) : data_(data) {
   max_clusters = static_cast<size_t>(
       round(sqrt(static_cast<double>(data_->GetNumOfPoints()) / 2.0)));
 }
