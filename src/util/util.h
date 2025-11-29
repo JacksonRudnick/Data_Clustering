@@ -1,3 +1,8 @@
+// Author: Jackson Rudnick
+// Coding Style Standards
+// https://google.github.io/styleguide/cppguide.html
+// Copyright 2025 Jackson Rudnick
+
 #ifndef UTIL_H_
 #define UTIL_H_
 
