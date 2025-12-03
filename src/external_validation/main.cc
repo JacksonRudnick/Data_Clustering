@@ -31,8 +31,6 @@ int main() {
 
   std::cout << "Dataset,Rand Index,Jaccard Index" << std::endl;
 
-  ExternalValidation* external_validation = new ExternalValidation();
-
   for (size_t i = 0; i < data.size(); i++) {
     k_means = new K_Means(data[i], InitializationMethod::RANDOM_SELECTION);
     k_means->Run();
